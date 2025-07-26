@@ -1,0 +1,6 @@
+@DAIS_HostAddress = http://localhost:5129
+
+GET {{DAIS_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
