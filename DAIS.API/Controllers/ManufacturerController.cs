@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace DAIS.API.Controllers
 {
@@ -17,11 +18,14 @@ namespace DAIS.API.Controllers
     public class ManufacturerController : ControllerBase
     {
         private readonly IManufacturerService _manufacturerService;
-        private readonly MaterialConfigSettings _materialConfig;
-        public ManufacturerController(IManufacturerService manufacturerService, IOptions<MaterialConfigSettings> materialConfig)
+        private readonly IFileManagerService _fileManagerService;
+        private readonly string folderName = "MaterialDocument" + "\\" + "ManufacturerDocument" + "\\";
+
+        public ManufacturerController(IManufacturerService manufacturerService,
+            IFileManagerService fileManagerService)
         {
             _manufacturerService = manufacturerService;
-            _materialConfig = materialConfig.Value;
+            _fileManagerService = fileManagerService;
 
         }
         [HttpGet("GetAllManufacturer")]
@@ -37,34 +41,47 @@ namespace DAIS.API.Controllers
             return Ok(listManufacturer);
         }
         [HttpPost]
-        public async Task<IActionResult> AddManufacturer([FromForm] IFormFile? manufacturerDocument, [FromForm] string manufacturerData)
+        public async Task<IActionResult> AddManufacturer(List<IFormFile> manufacturerDocuments, [FromForm] string manufacturerData)
         {
             if (manufacturerData == null || string.IsNullOrEmpty(manufacturerData))
             {
                 return BadRequest();
             }
             var ManufacturerDto = JsonConvert.DeserializeObject<ManufacturerDto>(manufacturerData);
-
-            if (manufacturerDocument != null)
+            if (manufacturerDocuments.Count>0)
             {
-                ManufacturerDto.ManufacturerDocument = await SavemanufacturerDocument(manufacturerDocument);
+                StringBuilder uploadedFiles = new StringBuilder();
+                foreach (var manufacturerDocument in manufacturerDocuments)
+                {
+                    var (isSucess, savedFile) = await _fileManagerService.UploadAndEncryptFile(manufacturerDocument, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
+                }
+                ManufacturerDto.ManufacturerDocument = uploadedFiles.ToString();
             }
+            
             var response = await _manufacturerService.AddManufacturer(ManufacturerDto);
             return Ok(response);
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateManufacturer([FromForm] IFormFile? manufacturerDocument, [FromForm] string manufacturerData)
+        public async Task<IActionResult> UpdateManufacturer(List<IFormFile> manufacturerDocuments, [FromForm] string manufacturerData)
         {
             if (manufacturerData == null || string.IsNullOrEmpty(manufacturerData))
             {
                 return BadRequest();
             }
             var ManufacturerDto = JsonConvert.DeserializeObject<ManufacturerDto>(manufacturerData);
-
-            if (manufacturerDocument != null)
+            if (manufacturerDocuments != null)
             {
-                ManufacturerDto.ManufacturerDocument = await SavemanufacturerDocument(manufacturerDocument);
+                StringBuilder uploadedFiles = new StringBuilder();
+                foreach (var manufacturerDocument in manufacturerDocuments)
+                {
+                    var (isSucess, savedFile) = await _fileManagerService.UploadAndEncryptFile(manufacturerDocument, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
+                }
+                ManufacturerDto.ManufacturerDocument = uploadedFiles.ToString();
             }
             var response = await _manufacturerService.UpdateManufactuter(ManufacturerDto);
             return Ok(response);
@@ -76,23 +93,18 @@ namespace DAIS.API.Controllers
             await _manufacturerService.DeleteManufacturer(id);
             return Ok();
         }
-        private async Task<string> SavemanufacturerDocument([FromForm] IFormFile? documentFile)
-        {
-            var folderName = "MaterialDocument" + "\\" + "ManufacturerDocument" + "\\";
-            var basePath = _materialConfig.DocumentBasePath;
-            string fileName = string.Empty;
-            string filePath = string.Empty;
-            fileName = documentFile.FileName;
-            var dir = Path.Combine(basePath, folderName);
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-            filePath = Path.Combine(folderName, fileName);
-            var fullFilePath = Path.Combine(dir, fileName);
-            await documentFile.CopyToAsync(new FileStream(fullFilePath, FileMode.Create));
 
-            return filePath;
+        [HttpGet("download-encrypted/{encodedPath}")]
+        public async Task<IActionResult> DownloadEncrypted(string encodedPath)
+        {
+            var base64EncodedBytes = Convert.FromBase64String(encodedPath);
+            var decodedPath = Encoding.UTF8.GetString(base64EncodedBytes);
+            var (stream, isSicess) = await _fileManagerService.GetEncryptedFile(decodedPath);
+
+            if (!isSicess)
+                return NotFound("File not found.");
+
+            return File(stream, "application/octet-stream", decodedPath);
         }
     }
 }

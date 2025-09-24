@@ -36,8 +36,7 @@ namespace DAIS.CoreBusiness.Mapper
                 .ForMember(dest => dest.Manufacturer, option => option.Ignore())
                 .ForMember(dest => dest.MaterialType, option => option.Ignore())
                 .ForMember(dest => dest.Category, option => option.Ignore())
-                .ForMember(dest => dest.Region, option => option.Ignore())
-                .ForMember(dest => dest.SubDivision, option => option.Ignore())
+                .ForMember(dest => dest.Region, option => option.Ignore())                
                 .ForMember(dest => dest.Location, option => option.Ignore())
                 .ForMember(dest => dest.Supplier, option => option.Ignore());
 

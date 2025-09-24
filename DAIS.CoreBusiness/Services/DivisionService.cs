@@ -71,8 +71,7 @@ namespace DAIS.CoreBusiness.Services
             List<DivisionDto> divisionDtoList = new List<DivisionDto>();
             try
             {
-                var divisionList = await _genericRepo.Query()
-                    .Include(x=>x.Location)
+                var divisionList = await _genericRepo.Query()                   
                     .ToListAsync().ConfigureAwait(false);
                 divisionDtoList.AddRange(_mapper.Map<List<DivisionDto>>(divisionList));
                 
@@ -94,7 +93,6 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var division = await _genericRepo.Query()
-                    .Include(x=>x.Location)
                     .FirstOrDefaultAsync(x=>x.Id==id);
                 divisionDto=_mapper.Map<DivisionDto>(division);
             }
@@ -115,8 +113,6 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var divisionlist = await _genericRepo.Query()
-                    .Where(x=>x.LocationId==locationId)
-                    .Include(x => x.Location)
                     .ToListAsync();
                 divisionDtoList.AddRange(_mapper.Map<List<DivisionDto>>(divisionlist));
             }
@@ -148,15 +144,15 @@ namespace DAIS.CoreBusiness.Services
             return divisiondto ;
         }
 
-        public DivisionDto GetDivisionIdByName(string name,Guid locationId)
+        public DivisionDto GetDivisionIdByName(string name)
         {
             _logger.LogInformation("DivisionService:GetDivisionIdByName:Method Start");
             DivisionDto divisionDto = new DivisionDto();
             try
             {
                 var division = _genericRepo.Query()
-                    .FirstOrDefault(x=>x.DivisionName==name
-                    && x.LocationId==locationId) ;
+                    .FirstOrDefault(x=>x.DivisionName.ToLower()==name.ToLower()
+                    ) ;
                 divisionDto = _mapper.Map<DivisionDto>(division);
             }
             catch (Exception ex)

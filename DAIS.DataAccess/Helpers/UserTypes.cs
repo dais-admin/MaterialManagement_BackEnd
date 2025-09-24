@@ -5,11 +5,12 @@ namespace DAIS.DataAccess.Helpers
 {
     public enum UserTypes
     {
-        SuperAdmin,
         Admin,
         Submitter,
         Reviewer,
         Approver,
+        MaterialIssuer,
+        MaterialReciever,
         Viewer,
         Supervisor
         

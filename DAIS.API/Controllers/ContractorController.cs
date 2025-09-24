@@ -1,11 +1,13 @@
 ﻿using DAIS.API.Helpers;
 using DAIS.CoreBusiness.Dtos;
 using DAIS.CoreBusiness.Interfaces;
+using DAIS.CoreBusiness.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace DAIS.API.Controllers
 {
@@ -15,11 +17,14 @@ namespace DAIS.API.Controllers
     public class ContractorController : ControllerBase
     {
         private readonly IContractorService _contractorService;
-        private readonly MaterialConfigSettings _materialConfig;
-        public ContractorController(IContractorService contractorService, IOptions<MaterialConfigSettings> materialConfig)
+        private readonly IFileManagerService _fileManagerService;
+        private readonly string folderName = "MaterialDocument" + "\\" + "ContractorDocuments" + "\\";
+
+        public ContractorController(IContractorService contractorService,
+            IFileManagerService fileManagerService)
         {
             _contractorService = contractorService;
-            _materialConfig = materialConfig.Value;
+            _fileManagerService = fileManagerService;
         }
         [HttpGet("GetAllContractor")]
         public async Task<IActionResult> GetAllContractor()
@@ -34,35 +39,49 @@ namespace DAIS.API.Controllers
             return Ok(listContractor);
         }
         [HttpPost]
-        public async Task<IActionResult> AddContractor([FromForm] IFormFile? contractorDocument, [FromForm] string contractorData)
+        public async Task<IActionResult> AddContractor(List<IFormFile> contractorDocuments, [FromForm] string contractorData)
         {
             if (contractorData == null || string.IsNullOrEmpty(contractorData))
             {
                 return BadRequest();
             }
             var contractorDto = JsonConvert.DeserializeObject<ContractorDto>(contractorData);
-
-            if (contractorDocument != null)
+            if (contractorDocuments.Count>0)
             {
-                contractorDto.ContractorDocument = await SaveContractorDocument(contractorDocument);
+                StringBuilder uploadedFiles = new StringBuilder();
+                foreach (var supplierDocumentFile in contractorDocuments)
+                {
+                    var (isSucess, savedFile) = await _fileManagerService.UploadAndEncryptFile(supplierDocumentFile, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
+                }
+                contractorDto.ContractorDocument = uploadedFiles.ToString();
             }
+            
             var response = await _contractorService.AddContractor(contractorDto);
             return Ok(response);
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateContractor([FromForm] IFormFile? contractorDocument, [FromForm] string contractorData)
+        public async Task<IActionResult> UpdateContractor(List<IFormFile> contractorDocuments, [FromForm] string contractorData)
         {
             if (contractorData == null || string.IsNullOrEmpty(contractorData))
             {
                 return BadRequest();
             }
             var contractorDto = JsonConvert.DeserializeObject<ContractorDto>(contractorData);
-
-            if (contractorDocument != null)
+            if (contractorDocuments.Count>0)
             {
-                contractorDto.ContractorDocument = await SaveContractorDocument(contractorDocument);
+                StringBuilder uploadedFiles = new StringBuilder();
+                foreach (var supplierDocumentFile in contractorDocuments)
+                {
+                    var (isSucess, savedFile) = await _fileManagerService.UploadAndEncryptFile(supplierDocumentFile, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
+                }
+                contractorDto.ContractorDocument = uploadedFiles.ToString();
             }
+            
             var response = await _contractorService.UpdateContractor(contractorDto);
             return Ok(response);
         }
@@ -73,23 +92,17 @@ namespace DAIS.API.Controllers
             await _contractorService.DeleteContractor(id);
             return Ok();
         }
-        private async Task<string> SaveContractorDocument([FromForm] IFormFile? documentFile)
+        [HttpGet("download-encrypted/{encodedPath}")]
+        public async Task<IActionResult> DownloadEncrypted(string encodedPath)
         {
-            var folderName = "MaterialDocument" + "\\" + "ContractorDocuments" + "\\";
-            var basePath = _materialConfig.DocumentBasePath;
-            string fileName = string.Empty;
-            string filePath = string.Empty;
-            fileName = documentFile.FileName;
-            var dir = Path.Combine(basePath, folderName);
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-            filePath = Path.Combine(folderName, fileName);
-            var fullFilePath = Path.Combine(dir, fileName);
-            await documentFile.CopyToAsync(new FileStream(fullFilePath, FileMode.Create));
+            var base64EncodedBytes = Convert.FromBase64String(encodedPath);
+            var decodedPath = Encoding.UTF8.GetString(base64EncodedBytes);
+            var (stream, isSicess) = await _fileManagerService.GetEncryptedFile(decodedPath);
 
-            return filePath;
+            if (!isSicess)
+                return NotFound("File not found.");
+
+            return File(stream, "application/octet-stream", decodedPath);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace DAIS.CoreBusiness.Seeding
         public static async Task SeedRoleFeatures(RoleManager<Role> roleManager, AppDbContext context)
         {
 
-            var role = await roleManager.FindByNameAsync("SUPERADMIN").ConfigureAwait(false);
+            var role = await roleManager.FindByNameAsync("ADMIN").ConfigureAwait(false);
             var features = await context.Features.ToListAsync().ConfigureAwait(false);
             var permissions = await context.Permissions.ToListAsync().ConfigureAwait(false);
             var roleFeatures = new List<RoleFeature>();

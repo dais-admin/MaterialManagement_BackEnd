@@ -8,6 +8,7 @@ namespace DAIS.DataAccess.Entities
         public string? ProductsDetails { get; set;}
         public string? ContactNo { get; set; }
         public string? ContactEmail { get; set; }
+        public string? Designation { get; set; }
         public string? Remarks { get; set;}
         public string? SupplierDocument {  get; set; }
         public Guid? MaterialTypeId { get; set; }

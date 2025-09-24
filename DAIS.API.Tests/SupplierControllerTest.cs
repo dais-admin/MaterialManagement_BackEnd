@@ -17,10 +17,12 @@ namespace DAIS.API.Tests
     public class SupplierControllerTest
     {
         private readonly Mock<ISupplierService> _supplierService;
+        private readonly Mock<IFileManagerService> _fileManagerService;
         private readonly Mock<IOptions<MaterialConfigSettings>> configMock;
         public SupplierControllerTest()
         {
             _supplierService = new Mock<ISupplierService>();
+            _fileManagerService = new Mock<IFileManagerService>();
             var _configData = new MaterialConfigSettings { DocumentBasePath = "TestConnectionString" };
             configMock = new Mock<IOptions<MaterialConfigSettings>>();
             configMock.Setup(x => x.Value).Returns(_configData);
@@ -32,7 +34,7 @@ namespace DAIS.API.Tests
             _supplierService.Setup(x => x.GetSupplier(It.IsAny<Guid>()))
             .ReturnsAsync(supplierDtoData[0]);
 
-            var supplierController = new SupplierController(_supplierService.Object, configMock.Object);
+            var supplierController = new SupplierController(_supplierService.Object, _fileManagerService.Object);
 
             var supplierResult = await supplierController.GetSupplier(Guid.NewGuid());
 
@@ -47,7 +49,7 @@ namespace DAIS.API.Tests
             _supplierService.Setup(x => x.GetAllSupplier())
             .ReturnsAsync(supplierDtoData);
 
-            var supplierController = new SupplierController(_supplierService.Object, configMock.Object);
+            var supplierController = new SupplierController(_supplierService.Object, _fileManagerService.Object);
 
             var supplierResult = await supplierController.GetAllSupplier();
 
@@ -63,7 +65,7 @@ namespace DAIS.API.Tests
            _supplierService.Setup(x => x.AddSupplier(supplierDto[0]))
             .ReturnsAsync(supplierDto[0]);
 
-            var supplierController = new SupplierController(_supplierService.Object, configMock.Object);
+            var supplierController = new SupplierController(_supplierService.Object, _fileManagerService.Object);
 
             var supplierResult = "";//await supplierController.AddSupplier(supplierDto[0]);
 
@@ -79,7 +81,7 @@ namespace DAIS.API.Tests
             _supplierService.Setup(x => x.UpdateSupplier(supplierDto[0]))
              .ReturnsAsync(supplierDto[0]);
 
-            var supplierController = new SupplierController(_supplierService.Object, configMock.Object);
+            var supplierController = new SupplierController(_supplierService.Object, _fileManagerService.Object);
 
             var supplierResult = ""; //await supplierController.UpdateSupplier(supplierDto[0]);
 
@@ -94,7 +96,7 @@ namespace DAIS.API.Tests
             _supplierService.Setup(x => x.DeleteSupplier(It.IsAny<Guid>()));
 
 
-            var supplierController = new SupplierController(_supplierService.Object, configMock.Object);
+            var supplierController = new SupplierController(_supplierService.Object, _fileManagerService.Object);
 
             await supplierController.DeleteSupplier(Guid.NewGuid());
 

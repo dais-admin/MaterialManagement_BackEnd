@@ -23,18 +23,15 @@ namespace DAIS.API.Controllers
         private readonly IMaterialAuditReportService _materialAuditReportService;
         private readonly IMaterialAuditService _materialAuditService;
         private readonly MaterialConfigSettings _materialConfig;
-        private readonly IFileEncryptionService _fileEncryptionService;
 
         public ReportsController(
             IMaterialAuditReportService materialAuditReport,
             IMaterialAuditService materialAuditService,
-            IOptions<MaterialConfigSettings> materialConfig,
-            IFileEncryptionService fileEncryptionService)
+            IOptions<MaterialConfigSettings> materialConfig)
         {
             _materialAuditReportService = materialAuditReport;
             _materialAuditService = materialAuditService;
             _materialConfig = materialConfig.Value;
-            _fileEncryptionService = fileEncryptionService;
         }
 
         [HttpGet("GetMaterialAuditReportByUser")]

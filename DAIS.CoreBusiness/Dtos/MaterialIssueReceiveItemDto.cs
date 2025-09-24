@@ -4,6 +4,7 @@ namespace DAIS.CoreBusiness.Dtos
 {
     public class MaterialIssueReceiveItemDto
     {
+        public Guid? Id { get; set; }
         public Guid IssuingLocation { get; set; }
         public LocationOperationDto? IssuingLocationOperation { get; set; }
         public VoucherType VoucherType { get; set; }
@@ -16,5 +17,6 @@ namespace DAIS.CoreBusiness.Dtos
         public LocationOperationDto? OnBoardedLocationOperation { get; set; }
         public Guid MaterialId {  get; set; }
         public MaterialDto? Material { get; set; }
+        public ApprovalStatus? ApprovalStatus { get; set; } 
     }  
 }

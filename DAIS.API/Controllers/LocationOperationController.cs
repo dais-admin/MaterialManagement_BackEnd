@@ -36,6 +36,12 @@ namespace DAIS.API.Controllers
             var listLocationOperation = await _locationOperationService.GetLocationsByWorkPackageId(workPackageId);
             return Ok(listLocationOperation);
         }
+        [HttpGet("GetLocationsBySubDivisionId")]
+        public async Task<IActionResult> GetLocationsBySubDivisionId(Guid subDivisionId)
+        {
+            var listLocationOperation = await _locationOperationService.GetLocationsBySubDivisionId(subDivisionId);
+            return Ok(listLocationOperation);
+        }
         [HttpPost]
         public async Task<IActionResult> AddLocationOperation(LocationOperationDto locationOperationDto)
         {

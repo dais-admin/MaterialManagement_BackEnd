@@ -131,15 +131,14 @@ namespace DAIS.CoreBusiness.Services
             return subDivisionDto;
         }
 
-        public SubDivisionDto GetSubDivisionIdByName(string name, Guid divisionId)
+        public SubDivisionDto GetSubDivisionIdByName(string name)
         {
             _logger.LogInformation("SubDivisionService:GetSubDivisionIdByName:Method Start");
             SubDivisionDto subDivisionDto = new SubDivisionDto();
             try
             {
                 var subDivision = _genericRepo.Query()
-                 .FirstOrDefault(x => x.SubDivisionName == name
-                 && x.DivisionId== divisionId);
+                 .FirstOrDefault(x => x.SubDivisionName.ToLower() == name.ToLower());
                 subDivisionDto = _mapper.Map<SubDivisionDto>(subDivision);
             }
             catch (Exception ex)

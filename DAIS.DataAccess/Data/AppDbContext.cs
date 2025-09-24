@@ -1,4 +1,4 @@
-﻿using DAIS.DataAccess.Entities;
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using DAIS.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -56,8 +56,26 @@ namespace DAIS.DataAccess.Data
         public DbSet<Agency> Agencies { get; set; }
         public DbSet<BulkUploadDetail> BulkUploadDetails { get; set; }
         public DbSet<MaterialIssueRecieveVoucher> MaterialIssueRecieveVouchers { get; set; }
-        public DbSet<MaterialVoucherTrancation> MaterialVoucherTrancations { get; set; }
+        public DbSet<MaterialVoucherTransaction> MaterialVoucherTrancations { get; set; }
+        public DbSet<MaterialVoucherTransactionApproval> MaterialVoucherTrancationApprovals {  get; set; }
+        public DbSet<DivisionMaterialTransfer> DivisionMaterialTransfers {  get; set; } 
+        public DbSet<DivisionMaterialTransferTrancation> DivisionMaterialTransferTrancations { get; set; }
+        public DbSet<DivisionToSubDivisionMaterialTransfer> DivisionToSubDivisionMaterialTransfers { get; set; }
+        public DbSet<DivisionToSubDivisionMaterialTransferTrancation> DivisionToSubDivisionMaterialTransferTrancations { get; set; }
+        public DbSet<DivisionToSubDivisionMaterialTransferApproval> DivisionToSubDivisionMaterialTransferApprovals {  get; set; }
+        public DbSet<SubDivisionToDivisionMaterialTransfer> SubDivisionToDivisionMaterialTransfers { get; set; }
+        public DbSet<SubDivisionToDivisionMaterialTransferTrancation> SubDivisionToDivisionMaterialTransferTrancations { get; set; }
+        public DbSet<SubDivisionToDivisionMaterialTransferApproval> SubDivisionToDivisionMaterialTransferApprovals { get; set; }
 
+        public DbSet<SubDivisionMaterialTransfer> SubDivisionMaterialTransfers { get; set; }
+        public DbSet<SubDivisionMaterialTransferTransaction> SubDivisionMaterialTransferTransactions { get; set; }
+        public DbSet<DivisionLocationMaterialTransfer> DivisionLocationMaterialTransfers { get; set; }
+        public DbSet<DivisionLocationMaterialTransferTrancation> DivisionLocationMaterialTransferTrancations { get; set; }
+        public DbSet<DivisionMaterialTransferApproval> DivisionMaterialTransferApprovals { get; set; }
+        public DbSet<SubDivisionMaterialTransferApproval> SubDivisionMaterialTransferApprovals { get; set; }
+        public DbSet<DivisionLocationMaterialTransferApproval> DivisionLocationMaterialTransferApprovals { get; set; }
+
+        public DbSet<AppBackupDetail> AppBackupDetails {  get; set; }
         public override int SaveChanges()
         {
             return SaveChangesWithAudit();
@@ -204,8 +222,7 @@ namespace DAIS.DataAccess.Data
             modelBuilder.Entity<User>().ToTable("AspNetUsers");
             modelBuilder.Entity<User>()
                .HasOne(m => m.Region).WithMany().HasForeignKey(m => m.RegionId);
-            modelBuilder.Entity<User>()
-               .HasOne(m => m.Location).WithMany().HasForeignKey(m => m.LocationId);
+         
             modelBuilder.Entity<User>()
               .HasOne(m => m.Project).WithMany().HasForeignKey(m => m.ProjectId);
 
@@ -223,7 +240,7 @@ namespace DAIS.DataAccess.Data
                 .IsUnique();
             // Add unique constraint for Division
             modelBuilder.Entity<Division>()
-                .HasIndex(s => new { s.DivisionName, s.LocationId })
+                .HasIndex(s => new { s.DivisionName })
                 .IsUnique();
             // Add unique constraint for Location
             modelBuilder.Entity<LocationOperation>()
@@ -280,71 +297,7 @@ namespace DAIS.DataAccess.Data
                 .WithMany()
                 .HasForeignKey(rf => rf.PermissionId);
 
-            modelBuilder.Entity<Material>()
-                .HasOne(m => m.MaterialType).WithMany().HasForeignKey(m => m.TypeId);
-            modelBuilder.Entity<Material>()
-               .HasOne(m => m.Category).WithMany().HasForeignKey(m => m.CategoryId);
-            modelBuilder.Entity<Material>()
-               .HasOne(m => m.Region).WithMany().HasForeignKey(m => m.RegionId);
-            modelBuilder.Entity<Material>()
-               .HasOne(m => m.Location).WithMany().HasForeignKey(m => m.LocationId);
-            modelBuilder.Entity<Material>()
-              .HasOne(m => m.SubDivision).WithMany().HasForeignKey(m => m.SubDivisionId);
-            modelBuilder.Entity<Material>()
-              .HasOne(m => m.Manufacturer).WithMany().HasForeignKey(m => m.ManufacturerId);
-            modelBuilder.Entity<Material>()
-              .HasOne(m => m.Supplier).WithMany().HasForeignKey(m => m.SupplierId);
             
-            modelBuilder.Entity<Material>()
-              .HasOne(m => m.WorkPackage).WithMany().HasForeignKey(m => m.WorkPackageId);
-
-            modelBuilder.Entity<Category>()
-             .HasOne(s => s.MaterialType)
-             .WithMany(c => c.Categories)
-             .HasForeignKey(s => s.MaterialTypeId);
-            modelBuilder.Entity<Category>()
-              .HasOne(m => m.Project).WithMany().HasForeignKey(m => m.ProjectId);
-
-            modelBuilder.Entity<MaterialDocument>()
-             .HasOne(s => s.DocumentType)
-             .WithMany(c => c.MaterialDocuments)
-             .HasForeignKey(s => s.DocumentTypeId);
-
-            modelBuilder.Entity<MaterialDocument>()
-             .HasOne(s => s.Material)
-             .WithMany(c => c.MaterialDocuments)
-             .HasForeignKey(s => s.MaterialId);
-
-            modelBuilder.Entity<MaterialServiceProvider>()
-             .HasOne(m => m.Manufacturer).WithMany().HasForeignKey(m => m.ManufacturerId);
-
-            modelBuilder.Entity<MaterialWarranty>()
-             .HasOne(m => m.Manufacturer).WithMany().HasForeignKey(m => m.ManufacturerId);
-            modelBuilder.Entity<MaterialWarranty>()
-             .HasOne(m => m.Material).WithMany().HasForeignKey(m => m.MaterialId);
-                     
-            modelBuilder.Entity<MaterialMaintenance>()
-             .HasOne(m => m.Material).WithMany().HasForeignKey(m => m.MaterialId);
-           
-            modelBuilder.Entity<MaterialHardware>()
-             .HasOne(m => m.Material).WithMany().HasForeignKey(m => m.MaterialId);
-            modelBuilder.Entity<MaterialHardware>()
-             .HasOne(m => m.Manufacturer).WithMany().HasForeignKey(m => m.ManufacturerId);
-            modelBuilder.Entity<MaterialHardware>()
-             .HasOne(m => m.Supplier).WithMany().HasForeignKey(m => m.SupplierId);
-            
-            modelBuilder.Entity<MaterialSoftware>()
-            .HasOne(m => m.Material).WithMany().HasForeignKey(m => m.MaterialId);
-            modelBuilder.Entity<MaterialSoftware>()
-             .HasOne(m => m.Supplier).WithMany().HasForeignKey(m => m.SupplierId);
-           
-            modelBuilder.Entity<MaterialApproval>()
-            .HasOne(m => m.Material).WithMany().HasForeignKey(m => m.MaterialId);
-            modelBuilder.Entity<MaterialApproval>()
-            .HasOne(m => m.Reveiwer).WithMany().HasForeignKey(m => m.ReveiwerId);
-            modelBuilder.Entity<MaterialApproval>()
-            .HasOne(m => m.Approver).WithMany().HasForeignKey(m => m.ApproverId);
-
             // Updated MaterialIssueRecieveVoucher relationships with DeleteBehavior.NoAction
             modelBuilder.Entity<MaterialIssueRecieveVoucher>()
            .HasOne(m => m.IssueLocation)
@@ -370,23 +323,352 @@ namespace DAIS.DataAccess.Data
            .HasForeignKey(m => m.MaterialId)
            .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<MaterialVoucherTrancation>()
+            modelBuilder.Entity<MaterialVoucherTransaction>()
            .HasOne(m => m.Location)
            .WithMany()
            .HasForeignKey(m => m.LocationId)
            .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<MaterialVoucherTrancation>()
+            modelBuilder.Entity<MaterialVoucherTransaction>()
            .HasOne(m => m.Material)
            .WithMany()
            .HasForeignKey(m => m.MaterialId)
            .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<MaterialVoucherTrancation>()
+            modelBuilder.Entity<MaterialVoucherTransaction>()
            .HasOne(m => m.MaterialIssueRecieveVoucher)
-           .WithMany()
+           .WithMany(m => m.MaterialVoucherTransactions)
            .HasForeignKey(m => m.MaterialIssueRecieveVoucherId)
            .OnDelete(DeleteBehavior.NoAction);
+
+           modelBuilder.Entity<DivisionMaterialTransfer>()
+          .HasOne(m => m.IssueDivision)
+          .WithMany()
+          .HasForeignKey(m => m.IssueDivisionId)
+          .OnDelete(DeleteBehavior.ClientSetNull)
+          .IsRequired();
+
+           modelBuilder.Entity<DivisionMaterialTransfer>()
+          .HasOne(m => m.RecieveDivision)
+          .WithMany()
+          .HasForeignKey(m => m.RecieveDivisionId)
+          .OnDelete(DeleteBehavior.ClientSetNull)
+          .IsRequired();
+
+           modelBuilder.Entity<DivisionMaterialTransfer>()
+          .HasOne(m => m.OnBoardedDivision)
+          .WithMany()
+          .HasForeignKey(m => m.OnBoardedDivisionId)
+          .OnDelete(DeleteBehavior.ClientSetNull);
+
+           modelBuilder.Entity<DivisionMaterialTransferTrancation>()
+                .HasOne(m => m.DivisionMaterialTransfer)
+                .WithMany(d => d.DivisionMaterialTransferTrancations)
+                .HasForeignKey(m => m.DivisionMaterialTransferId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired();
+
+           modelBuilder.Entity<DivisionMaterialTransferTrancation>()
+                .HasOne(m => m.Division)
+                .WithMany()
+                .HasForeignKey(m => m.DivisionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired();
+
+            modelBuilder.Entity<SubDivisionMaterialTransfer>()
+          .HasOne(m => m.IssueSubDivision)
+          .WithMany()
+          .HasForeignKey(m => m.IssueSubDivisionId)
+          .OnDelete(DeleteBehavior.ClientSetNull)
+          .IsRequired();
+
+            modelBuilder.Entity<SubDivisionMaterialTransfer>()
+           .HasOne(m => m.RecieveSubDivision)
+           .WithMany()
+           .HasForeignKey(m => m.RecieveSubDivisionId)
+           .OnDelete(DeleteBehavior.ClientSetNull)
+           .IsRequired();
+
+            modelBuilder.Entity<SubDivisionMaterialTransfer>()
+           .HasOne(m => m.OnBoardedSubDivision)
+           .WithMany()
+           .HasForeignKey(m => m.OnBoardedSubDivisionId)
+           .OnDelete(DeleteBehavior.ClientSetNull);
+
+            modelBuilder.Entity<SubDivisionMaterialTransferTransaction>()
+                 .HasOne(m => m.SubDivisionMaterialTransfer)
+                 .WithMany(d => d.SubDivisionMaterialTransferTrancations)
+                 .HasForeignKey(m => m.SubDivisionMaterialTransferId)
+                 .OnDelete(DeleteBehavior.ClientSetNull)
+                 .IsRequired();
+
+            modelBuilder.Entity<SubDivisionMaterialTransferTransaction>()
+                 .HasOne(m => m.SubDivision)
+                 .WithMany()
+                 .HasForeignKey(m => m.SubDivisionId)
+                 .OnDelete(DeleteBehavior.ClientSetNull)
+                 .IsRequired();
+
+            // DivisionLocationMaterialTransfer relationships
+            modelBuilder.Entity<DivisionLocationMaterialTransfer>()
+                .HasOne(m => m.IssueDivision)
+                .WithMany()
+                .HasForeignKey(m => m.IssueDivisionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired();
+
+            modelBuilder.Entity<DivisionLocationMaterialTransfer>()
+                .HasOne(m => m.RecieveLocation)
+                .WithMany()
+                .HasForeignKey(m => m.RecieveLocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired();
+
+            modelBuilder.Entity<DivisionLocationMaterialTransfer>()
+                .HasOne(m => m.OnBoardedDivision)
+                .WithMany()
+                .HasForeignKey(m => m.OnBoardedDivisionId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            modelBuilder.Entity<DivisionLocationMaterialTransfer>()
+                .HasOne(m => m.Material)
+                .WithMany()
+                .HasForeignKey(m => m.MaterialId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired();
+
+            modelBuilder.Entity<DivisionLocationMaterialTransferTrancation>()
+                .HasOne(m => m.DivisionLocationMaterialTransfer)
+                .WithMany(d => d.DivisionLocationMaterialTransferTrancations)
+                .HasForeignKey(m => m.DivisionMaterialTransferId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired();
+
+            modelBuilder.Entity<DivisionLocationMaterialTransferTrancation>()
+                .HasOne(m => m.Location)
+                .WithMany()
+                .HasForeignKey(m => m.LocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired();
+
+            modelBuilder.Entity<DivisionLocationMaterialTransferTrancation>()
+                .HasOne(m => m.Material)
+                .WithMany()
+                .HasForeignKey(m => m.MaterialId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired();
+
+            // DivisionMaterialTransferApproval relationships
+            modelBuilder.Entity<DivisionMaterialTransferApproval>()
+                .HasOne(m => m.DivisionMaterialTransfer)
+                .WithMany()
+                .HasForeignKey(m => m.DivisionMaterialTransferId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired();
+
+            modelBuilder.Entity<DivisionMaterialTransferApproval>()
+                .HasOne(m => m.Issuer)
+                .WithMany()
+                .HasForeignKey(m => m.IssuerId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            modelBuilder.Entity<DivisionMaterialTransferApproval>()
+                .HasOne(m => m.Reciever)
+                .WithMany()
+                .HasForeignKey(m => m.RecieverId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            // SubDivisionMaterialTransferApproval relationships
+            modelBuilder.Entity<SubDivisionMaterialTransferApproval>()
+                .HasOne(m => m.SubDivisionMaterialTransfer)
+                .WithMany()
+                .HasForeignKey(m => m.SubDivisionMaterialTransferId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired();
+
+            modelBuilder.Entity<SubDivisionMaterialTransferApproval>()
+                .HasOne(m => m.Issuer)
+                .WithMany()
+                .HasForeignKey(m => m.IssuerId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            modelBuilder.Entity<SubDivisionMaterialTransferApproval>()
+                .HasOne(m => m.Reciever)
+                .WithMany()
+                .HasForeignKey(m => m.RecieverId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            // DivisionLocationMaterialTransferApproval relationships
+            modelBuilder.Entity<DivisionLocationMaterialTransferApproval>()
+                .HasOne(m => m.DivisionLocationMaterialTransfer)
+                .WithMany()
+                .HasForeignKey(m => m.DivisionLocationMaterialTransferId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired();
+
+            modelBuilder.Entity<DivisionLocationMaterialTransferApproval>()
+                .HasOne(m => m.Issuer)
+                .WithMany()
+                .HasForeignKey(m => m.IssuerId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            modelBuilder.Entity<DivisionLocationMaterialTransferApproval>()
+                .HasOne(m => m.Reciever)
+                .WithMany()
+                .HasForeignKey(m => m.RecieverId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            // DivisionToSubDivisionMaterialTransfer relationships
+            modelBuilder.Entity<DivisionToSubDivisionMaterialTransfer>()
+                .HasOne(m => m.IssueDivision)
+                .WithMany()
+                .HasForeignKey(m => m.IssueDivisionId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            modelBuilder.Entity<DivisionToSubDivisionMaterialTransfer>()
+                .HasOne(m => m.TargetSubDivision)
+                .WithMany()
+                .HasForeignKey(m => m.TargetSubDivisionId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            modelBuilder.Entity<DivisionToSubDivisionMaterialTransfer>()
+                .HasOne(m => m.OnBoardedDivision)
+                .WithMany()
+                .HasForeignKey(m => m.OnBoardedDivisionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<DivisionToSubDivisionMaterialTransfer>()
+                .HasOne(m => m.Material)
+                .WithMany()
+                .HasForeignKey(m => m.MaterialId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            modelBuilder.Entity<DivisionToSubDivisionMaterialTransferTrancation>()
+                .HasOne(m => m.DivisionToSubDivisionMaterialTransfer)
+                .WithMany(d => d.DivisionToSubDivisionMaterialTransferTrancation)
+                .HasForeignKey(m => m.DivisionToSubDivisionMaterialTransferId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            modelBuilder.Entity<DivisionToSubDivisionMaterialTransferTrancation>()
+                .HasOne(m => m.Division)
+                .WithMany()
+                .HasForeignKey(m => m.DivisionId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            modelBuilder.Entity<DivisionToSubDivisionMaterialTransferTrancation>()
+              .HasOne(m => m.SubDivision)
+              .WithMany()
+              .HasForeignKey(m => m.SubDivisionId)
+              .OnDelete(DeleteBehavior.NoAction)
+              .IsRequired();
+
+            modelBuilder.Entity<DivisionToSubDivisionMaterialTransferTrancation>()
+                .HasOne(m => m.Material)
+                .WithMany()
+                .HasForeignKey(m => m.MaterialId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            // DivisionToSubDivisionTransferApproval relationships
+            modelBuilder.Entity<DivisionToSubDivisionMaterialTransferApproval>()
+                .HasOne(m => m.DivisionToSubDivisionMaterialTransfer)
+                .WithMany()
+                .HasForeignKey(m => m.DivisionToSubDivisionMaterialTransferId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            modelBuilder.Entity<DivisionToSubDivisionMaterialTransferApproval>()
+                .HasOne(m => m.Issuer)
+                .WithMany()
+                .HasForeignKey(m => m.IssuerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<DivisionToSubDivisionMaterialTransferApproval>()
+                .HasOne(m => m.Reciever)
+                .WithMany()
+                .HasForeignKey(m => m.RecieverId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // SubDivisionToDivisionMaterialTransfer relationships
+            modelBuilder.Entity<SubDivisionToDivisionMaterialTransfer>()
+                .HasOne(m => m.IssueSubDivision)
+                .WithMany()
+                .HasForeignKey(m => m.IssueSubDivisionId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            modelBuilder.Entity<SubDivisionToDivisionMaterialTransfer>()
+                .HasOne(m => m.RecieveDivision)
+                .WithMany()
+                .HasForeignKey(m => m.RecieveDivisionId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            modelBuilder.Entity<SubDivisionToDivisionMaterialTransfer>()
+                .HasOne(m => m.OnBoardedSubDivision)
+                .WithMany()
+                .HasForeignKey(m => m.OnBoardedSubDivisionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<SubDivisionToDivisionMaterialTransfer>()
+                .HasOne(m => m.Material)
+                .WithMany()
+                .HasForeignKey(m => m.MaterialId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            modelBuilder.Entity<SubDivisionToDivisionMaterialTransferTrancation>()
+                .HasOne(m => m.SubDivisionToDivisionMaterialTransfer)
+                .WithMany()
+                .HasForeignKey(m => m.SubDivToDivMaterialTransferId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            modelBuilder.Entity<SubDivisionToDivisionMaterialTransferTrancation>()
+                .HasOne(m => m.Division)
+                .WithMany()
+                .HasForeignKey(m => m.DivisionId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            modelBuilder.Entity<SubDivisionToDivisionMaterialTransferTrancation>()
+              .HasOne(m => m.SubDivision)
+              .WithMany()
+              .HasForeignKey(m => m.SubDivisionId)
+              .OnDelete(DeleteBehavior.NoAction)
+              .IsRequired();
+
+            modelBuilder.Entity<SubDivisionToDivisionMaterialTransferTrancation>()
+                .HasOne(m => m.Material)
+                .WithMany()
+                .HasForeignKey(m => m.MaterialId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            // SubDivisionToDivisionMaterialTransferApproval relationships
+            modelBuilder.Entity<SubDivisionToDivisionMaterialTransferApproval>()
+                .HasOne(m => m.SubDivisionToDivisionMaterialTransfer)
+                .WithMany()
+                .HasForeignKey(m => m.SubDivToDivMaterialTransferApprovalId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired();
+
+            modelBuilder.Entity<SubDivisionToDivisionMaterialTransferApproval>()
+                .HasOne(m => m.Issuer)
+                .WithMany()
+                .HasForeignKey(m => m.IssuerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<SubDivisionToDivisionMaterialTransferApproval>()
+                .HasOne(m => m.Reciever)
+                .WithMany()
+                .HasForeignKey(m => m.RecieverId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             base.OnModelCreating(modelBuilder);
         }

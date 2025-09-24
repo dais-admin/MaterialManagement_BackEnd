@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using DAIS.Infrastructure.EmailProvider;
+using Microsoft.EntityFrameworkCore;
 
 namespace DAIS.CoreBusiness.Services
 {
@@ -46,10 +47,11 @@ namespace DAIS.CoreBusiness.Services
         {
             _logger.LogInformation("AccountService:Login:Method Start");
             UserDto userDto = new();
+            User existinguser = null;
             try
             {
-                var user = await GetUserByEmail(loginDto.UserEmail);
-                if (user == null)
+                existinguser = await GetUserByEmail(loginDto.UserEmail);
+                if (existinguser == null)
                 {
                     userDto.Email = loginDto.UserEmail;
                     userDto.IsSuccess = false;
@@ -57,16 +59,29 @@ namespace DAIS.CoreBusiness.Services
                 }
                 else
                 {
-                    if (IsValidUser(user, loginDto.Password))
+                    if (await IsValidUser(existinguser, loginDto.Password))
                     {
-                        var userRoles= await _userManager.GetRolesAsync(user).ConfigureAwait(false);
-                        userDto.Id=Guid.Parse(user.Id);
+                        var userRoles= await _userManager.GetRolesAsync(existinguser).ConfigureAwait(false);
+                        userDto.Id=Guid.Parse(existinguser.Id);
                         userDto.Email = loginDto.UserEmail;
                         userDto.IsSuccess = true;
-                        userDto.UserToken = _tokenService.GenarateToken(user).Result;
+                        userDto.UserToken = _tokenService.GenarateToken(existinguser).Result;
                         userDto.UserType = string.Join(",", userRoles);
-                        userDto.UserName = user.UserName;
-                        userDto.EmployeeName = user.EmployeeName;
+                        userDto.UserName = existinguser.UserName;
+                        userDto.EmployeeName = existinguser.EmployeeName;
+                        if (existinguser.SubDivisionId!=null)
+                        {
+                            userDto.SubDivisionId = existinguser.SubDivisionId;
+                            
+                        }                      
+                        if(existinguser.LocationId!=null)
+                        {
+                            userDto.LocationId = existinguser.LocationId;
+                        }
+                        if (existinguser.DivisionId != null)
+                        {
+                            userDto.DivisionId = existinguser.DivisionId;
+                        }
                         userDto.Message = "User Login SuccessFully";
 
                     }
@@ -119,12 +134,13 @@ namespace DAIS.CoreBusiness.Services
        
         private async Task<User> GetUserByEmail(string userEmail)
         {
-            var user = await _genericRepository.GetAll().ConfigureAwait(false);
+            var user = await _genericRepository.Query()                
+                .FirstOrDefaultAsync(x => x.Email.Trim() == userEmail.Trim());
             if (user is null)
             {
                 _logger.LogError($"User does not exist with UserName:{userEmail}");
             }
-            return user.FirstOrDefault(x => x.Email.Trim() == userEmail.Trim());
+            return user;
         }
 
        
@@ -177,7 +193,8 @@ namespace DAIS.CoreBusiness.Services
                         NormalizedUserName = registrationDto.UserName,
                         LocationId = registrationDto.LocationId,
                         RegionId = registrationDto.RegionId,
-                        SubDivisionId=registrationDto.SubDivisionId,
+                        DivisionId= registrationDto.DivisionId,
+                        SubDivisionId =registrationDto.SubDivisionId,
                         ProjectId=registrationDto.ProjectId,
                         UserPhoto=registrationDto.UserPhoto,
                         UserType = UserTypes.Viewer, //(UserTypes)Enum.Parse(typeof(UserTypes), registrationDto.UserType, true),
@@ -243,10 +260,10 @@ namespace DAIS.CoreBusiness.Services
             return userDto;
         }
        
-        private bool IsValidUser(User user, string password)
+        private async Task<bool> IsValidUser(User user, string password)
         {
-            bool isValid = true;
-            
+           
+            bool isValid= await _userManager.CheckPasswordAsync(user, password);
             return isValid;
         }
 

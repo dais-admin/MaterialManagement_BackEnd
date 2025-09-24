@@ -73,6 +73,32 @@ namespace DAIS.DataAccess.Migrations
                     b.ToTable("Agencies");
                 });
 
+            modelBuilder.Entity("DAIS.DataAccess.Entities.AppBackupDetail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("BackupDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("BackupLocation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("BackupSize")
+                        .HasColumnType("int");
+
+                    b.Property<string>("BackupStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BackupType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppBackupDetails");
+                });
+
             modelBuilder.Entity("DAIS.DataAccess.Entities.AuditLogs", b =>
                 {
                     b.Property<int>("Id")
@@ -295,9 +321,6 @@ namespace DAIS.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("LocationId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(max)");
 
@@ -309,13 +332,510 @@ namespace DAIS.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LocationId");
-
-                    b.HasIndex("DivisionName", "LocationId")
+                    b.HasIndex("DivisionName")
                         .IsUnique()
-                        .HasFilter("[DivisionName] IS NOT NULL AND [LocationId] IS NOT NULL");
+                        .HasFilter("[DivisionName] IS NOT NULL");
 
                     b.ToTable("Divisions");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionLocationMaterialTransfer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("IssueDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("IssuedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("OnBoardedDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("OnBoardedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("RecieveLocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("RecievedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("VoucherDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VoucherNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VoucherType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IssueDivisionId");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("OnBoardedDivisionId");
+
+                    b.HasIndex("RecieveLocationId");
+
+                    b.ToTable("DivisionLocationMaterialTransfers");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionLocationMaterialTransferApproval", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ApprovalStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("DivisionLocationMaterialTransferId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("IssuerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RecieverId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DivisionLocationMaterialTransferId");
+
+                    b.HasIndex("IssuerId");
+
+                    b.HasIndex("RecieverId");
+
+                    b.ToTable("DivisionLocationMaterialTransferApprovals");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionLocationMaterialTransferTrancation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("DivisionMaterialTransferId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("IssuedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RecievedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VoucherType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DivisionMaterialTransferId");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("MaterialId");
+
+                    b.ToTable("DivisionLocationMaterialTransferTrancations");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionMaterialTransfer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("IssueDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("IssuedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("OnBoardedDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("OnBoardedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("RecieveDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("RecievedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("VoucherDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VoucherNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VoucherType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IssueDivisionId");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("OnBoardedDivisionId");
+
+                    b.HasIndex("RecieveDivisionId");
+
+                    b.ToTable("DivisionMaterialTransfers");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionMaterialTransferApproval", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ApprovalStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("DivisionMaterialTransferId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("IssuerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RecieverId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DivisionMaterialTransferId");
+
+                    b.HasIndex("IssuerId");
+
+                    b.HasIndex("RecieverId");
+
+                    b.ToTable("DivisionMaterialTransferApprovals");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionMaterialTransferTrancation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("DivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DivisionMaterialTransferId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("IssuedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RecievedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VoucherType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DivisionId");
+
+                    b.HasIndex("DivisionMaterialTransferId");
+
+                    b.HasIndex("MaterialId");
+
+                    b.ToTable("DivisionMaterialTransferTrancations");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionToSubDivisionMaterialTransfer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("IssueDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("IssuedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("OnBoardedDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("OnBoardedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RecievedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TargetSubDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("VoucherDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VoucherNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VoucherType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IssueDivisionId");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("OnBoardedDivisionId");
+
+                    b.HasIndex("TargetSubDivisionId");
+
+                    b.ToTable("DivisionToSubDivisionMaterialTransfers");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionToSubDivisionMaterialTransferApproval", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ApprovalStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("DivisionToSubDivisionMaterialTransferId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("IssuerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RecieverId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DivisionToSubDivisionMaterialTransferId");
+
+                    b.HasIndex("IssuerId");
+
+                    b.HasIndex("RecieverId");
+
+                    b.ToTable("DivisionToSubDivisionMaterialTransferApprovals");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionToSubDivisionMaterialTransferTrancation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DivisionId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DivisionToSubDivisionMaterialTransferId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("IssuedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RecievedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("SubDivisionId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VoucherType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DivisionId");
+
+                    b.HasIndex("DivisionToSubDivisionMaterialTransferId");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("SubDivisionId");
+
+                    b.ToTable("DivisionToSubDivisionMaterialTransferTrancations");
                 });
 
             modelBuilder.Entity("DAIS.DataAccess.Entities.DocumentType", b =>
@@ -448,6 +968,9 @@ namespace DAIS.DataAccess.Migrations
                     b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("SubDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("System")
                         .HasColumnType("nvarchar(450)");
 
@@ -461,6 +984,8 @@ namespace DAIS.DataAccess.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SubDivisionId");
 
                     b.HasIndex("WorkPackageId");
 
@@ -550,9 +1075,6 @@ namespace DAIS.DataAccess.Migrations
                     b.Property<Guid?>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CategoryId1")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("CommissioningDate")
                         .HasColumnType("datetime2");
 
@@ -586,16 +1108,10 @@ namespace DAIS.DataAccess.Migrations
                     b.Property<Guid?>("LocationId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("LocationOperationId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("LocationRFId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ManufacturerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ManufacturerId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("MaterialCode")
@@ -628,9 +1144,6 @@ namespace DAIS.DataAccess.Migrations
                     b.Property<Guid?>("RegionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("RegionId1")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("RehabilitationMaterialCode")
                         .HasColumnType("nvarchar(max)");
 
@@ -641,9 +1154,6 @@ namespace DAIS.DataAccess.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("SupplierId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("SupplierId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("System")
@@ -673,19 +1183,13 @@ namespace DAIS.DataAccess.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("CategoryId1");
-
                     b.HasIndex("ContractorId");
 
                     b.HasIndex("DivisionId");
 
                     b.HasIndex("LocationId");
 
-                    b.HasIndex("LocationOperationId");
-
                     b.HasIndex("ManufacturerId");
-
-                    b.HasIndex("ManufacturerId1");
 
                     b.HasIndex("MaterialTypeId");
 
@@ -693,15 +1197,7 @@ namespace DAIS.DataAccess.Migrations
 
                     b.HasIndex("RegionId");
 
-                    b.HasIndex("RegionId1");
-
-                    b.HasIndex("SubDivisionId");
-
                     b.HasIndex("SupplierId");
-
-                    b.HasIndex("SupplierId1");
-
-                    b.HasIndex("TypeId");
 
                     b.HasIndex("WorkPackageId");
 
@@ -744,9 +1240,6 @@ namespace DAIS.DataAccess.Migrations
                     b.Property<Guid>("MaterialId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("MaterialId1")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("ReveiwerId")
                         .HasColumnType("nvarchar(450)");
 
@@ -776,8 +1269,6 @@ namespace DAIS.DataAccess.Migrations
                     b.HasIndex("ApproverId");
 
                     b.HasIndex("MaterialId");
-
-                    b.HasIndex("MaterialId1");
 
                     b.HasIndex("ReveiwerId");
 
@@ -972,6 +1463,12 @@ namespace DAIS.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AgencyAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("AgencyId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -980,6 +1477,9 @@ namespace DAIS.DataAccess.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<string>("MaintenanceDocument")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("MaintenanceEndDate")
                         .HasColumnType("datetime2");
@@ -1000,6 +1500,8 @@ namespace DAIS.DataAccess.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AgencyId");
 
                     b.HasIndex("MaterialId");
 
@@ -1199,7 +1701,7 @@ namespace DAIS.DataAccess.Migrations
                     b.ToTable("MaterialTypes");
                 });
 
-            modelBuilder.Entity("DAIS.DataAccess.Entities.MaterialVoucherTrancation", b =>
+            modelBuilder.Entity("DAIS.DataAccess.Entities.MaterialVoucherTransaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1226,9 +1728,6 @@ namespace DAIS.DataAccess.Migrations
                     b.Property<Guid>("MaterialIssueRecieveVoucherId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("MaterialIssueRecieveVoucherId1")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
@@ -1252,9 +1751,51 @@ namespace DAIS.DataAccess.Migrations
 
                     b.HasIndex("MaterialIssueRecieveVoucherId");
 
-                    b.HasIndex("MaterialIssueRecieveVoucherId1");
-
                     b.ToTable("MaterialVoucherTrancations");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.MaterialVoucherTransactionApproval", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ApprovalStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("IssuerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("MaterialIssueRecieveVoucherId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RecieverId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IssuerId");
+
+                    b.HasIndex("MaterialIssueRecieveVoucherId");
+
+                    b.HasIndex("RecieverId");
+
+                    b.ToTable("MaterialVoucherTrancationApprovals");
                 });
 
             modelBuilder.Entity("DAIS.DataAccess.Entities.MaterialWarranty", b =>
@@ -1267,6 +1808,12 @@ namespace DAIS.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DLPEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DLPStartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
@@ -1390,7 +1937,7 @@ namespace DAIS.DataAccess.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("EndDate")
+                    b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
@@ -1513,7 +2060,7 @@ namespace DAIS.DataAccess.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("DivisionId")
+                    b.Property<Guid>("DivisionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -1540,9 +2087,349 @@ namespace DAIS.DataAccess.Migrations
 
                     b.HasIndex("SubDivisionName", "DivisionId")
                         .IsUnique()
-                        .HasFilter("[SubDivisionName] IS NOT NULL AND [DivisionId] IS NOT NULL");
+                        .HasFilter("[SubDivisionName] IS NOT NULL");
 
                     b.ToTable("SubDivisions");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionMaterialTransfer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("IssueSubDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("IssuedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("OnBoardedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("OnBoardedSubDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RecieveSubDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("RecievedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("VoucherDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VoucherNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VoucherType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IssueSubDivisionId");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("OnBoardedSubDivisionId");
+
+                    b.HasIndex("RecieveSubDivisionId");
+
+                    b.ToTable("SubDivisionMaterialTransfers");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionMaterialTransferApproval", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ApprovalStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("IssuerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RecieverId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("SubDivisionMaterialTransferId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IssuerId");
+
+                    b.HasIndex("RecieverId");
+
+                    b.HasIndex("SubDivisionMaterialTransferId");
+
+                    b.ToTable("SubDivisionMaterialTransferApprovals");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionMaterialTransferTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("IssuedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RecievedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SubDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SubDivisionMaterialTransferId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VoucherType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("SubDivisionId");
+
+                    b.HasIndex("SubDivisionMaterialTransferId");
+
+                    b.ToTable("SubDivisionMaterialTransferTransactions");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionToDivisionMaterialTransfer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("IssueSubDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("IssuedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("OnBoardedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("OnBoardedSubDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RecieveDivisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("RecievedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("VoucherDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VoucherNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VoucherType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IssueSubDivisionId");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("OnBoardedSubDivisionId");
+
+                    b.HasIndex("RecieveDivisionId");
+
+                    b.ToTable("SubDivisionToDivisionMaterialTransfers");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionToDivisionMaterialTransferApproval", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ApprovalStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("IssuerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RecieverId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("SubDivToDivMaterialTransferApprovalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IssuerId");
+
+                    b.HasIndex("RecieverId");
+
+                    b.HasIndex("SubDivToDivMaterialTransferApprovalId");
+
+                    b.ToTable("SubDivisionToDivisionMaterialTransferApprovals");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionToDivisionMaterialTransferTrancation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DivisionId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("IssuedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RecievedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SubDivToDivMaterialTransferId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SubDivisionId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SubDivisionToDivisionMaterialTransferId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VoucherType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DivisionId");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("SubDivToDivMaterialTransferId");
+
+                    b.HasIndex("SubDivisionId");
+
+                    b.HasIndex("SubDivisionToDivisionMaterialTransferId");
+
+                    b.ToTable("SubDivisionToDivisionMaterialTransferTrancations");
                 });
 
             modelBuilder.Entity("DAIS.DataAccess.Entities.Supplier", b =>
@@ -1565,6 +2452,9 @@ namespace DAIS.DataAccess.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Designation")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -1617,6 +2507,9 @@ namespace DAIS.DataAccess.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("DivisionId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -1687,8 +2580,6 @@ namespace DAIS.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LocationId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -1700,8 +2591,6 @@ namespace DAIS.DataAccess.Migrations
                     b.HasIndex("ProjectId");
 
                     b.HasIndex("RegionId");
-
-                    b.HasIndex("SubDivisionId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -1949,22 +2838,269 @@ namespace DAIS.DataAccess.Migrations
                     b.Navigation("MaterialType");
                 });
 
-            modelBuilder.Entity("DAIS.DataAccess.Entities.Division", b =>
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionLocationMaterialTransfer", b =>
                 {
+                    b.HasOne("DAIS.DataAccess.Entities.Division", "IssueDivision")
+                        .WithMany()
+                        .HasForeignKey("IssueDivisionId")
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.Division", "OnBoardedDivision")
+                        .WithMany()
+                        .HasForeignKey("OnBoardedDivisionId");
+
+                    b.HasOne("DAIS.DataAccess.Entities.LocationOperation", "RecieveLocation")
+                        .WithMany()
+                        .HasForeignKey("RecieveLocationId")
+                        .IsRequired();
+
+                    b.Navigation("IssueDivision");
+
+                    b.Navigation("Material");
+
+                    b.Navigation("OnBoardedDivision");
+
+                    b.Navigation("RecieveLocation");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionLocationMaterialTransferApproval", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.DivisionLocationMaterialTransfer", "DivisionLocationMaterialTransfer")
+                        .WithMany()
+                        .HasForeignKey("DivisionLocationMaterialTransferId")
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.User", "Issuer")
+                        .WithMany()
+                        .HasForeignKey("IssuerId");
+
+                    b.HasOne("DAIS.DataAccess.Entities.User", "Reciever")
+                        .WithMany()
+                        .HasForeignKey("RecieverId");
+
+                    b.Navigation("DivisionLocationMaterialTransfer");
+
+                    b.Navigation("Issuer");
+
+                    b.Navigation("Reciever");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionLocationMaterialTransferTrancation", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.DivisionLocationMaterialTransfer", "DivisionLocationMaterialTransfer")
+                        .WithMany("DivisionLocationMaterialTransferTrancations")
+                        .HasForeignKey("DivisionMaterialTransferId")
+                        .IsRequired();
+
                     b.HasOne("DAIS.DataAccess.Entities.LocationOperation", "Location")
                         .WithMany()
-                        .HasForeignKey("LocationId");
+                        .HasForeignKey("LocationId")
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .IsRequired();
+
+                    b.Navigation("DivisionLocationMaterialTransfer");
 
                     b.Navigation("Location");
+
+                    b.Navigation("Material");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionMaterialTransfer", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.Division", "IssueDivision")
+                        .WithMany()
+                        .HasForeignKey("IssueDivisionId")
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.Division", "OnBoardedDivision")
+                        .WithMany()
+                        .HasForeignKey("OnBoardedDivisionId");
+
+                    b.HasOne("DAIS.DataAccess.Entities.Division", "RecieveDivision")
+                        .WithMany()
+                        .HasForeignKey("RecieveDivisionId")
+                        .IsRequired();
+
+                    b.Navigation("IssueDivision");
+
+                    b.Navigation("Material");
+
+                    b.Navigation("OnBoardedDivision");
+
+                    b.Navigation("RecieveDivision");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionMaterialTransferApproval", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.DivisionMaterialTransfer", "DivisionMaterialTransfer")
+                        .WithMany()
+                        .HasForeignKey("DivisionMaterialTransferId")
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.User", "Issuer")
+                        .WithMany()
+                        .HasForeignKey("IssuerId");
+
+                    b.HasOne("DAIS.DataAccess.Entities.User", "Reciever")
+                        .WithMany()
+                        .HasForeignKey("RecieverId");
+
+                    b.Navigation("DivisionMaterialTransfer");
+
+                    b.Navigation("Issuer");
+
+                    b.Navigation("Reciever");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionMaterialTransferTrancation", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.Division", "Division")
+                        .WithMany()
+                        .HasForeignKey("DivisionId")
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.DivisionMaterialTransfer", "DivisionMaterialTransfer")
+                        .WithMany("DivisionMaterialTransferTrancations")
+                        .HasForeignKey("DivisionMaterialTransferId")
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Division");
+
+                    b.Navigation("DivisionMaterialTransfer");
+
+                    b.Navigation("Material");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionToSubDivisionMaterialTransfer", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.Division", "IssueDivision")
+                        .WithMany()
+                        .HasForeignKey("IssueDivisionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.Division", "OnBoardedDivision")
+                        .WithMany()
+                        .HasForeignKey("OnBoardedDivisionId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivision", "TargetSubDivision")
+                        .WithMany()
+                        .HasForeignKey("TargetSubDivisionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("IssueDivision");
+
+                    b.Navigation("Material");
+
+                    b.Navigation("OnBoardedDivision");
+
+                    b.Navigation("TargetSubDivision");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionToSubDivisionMaterialTransferApproval", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.DivisionToSubDivisionMaterialTransfer", "DivisionToSubDivisionMaterialTransfer")
+                        .WithMany()
+                        .HasForeignKey("DivisionToSubDivisionMaterialTransferId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.User", "Issuer")
+                        .WithMany()
+                        .HasForeignKey("IssuerId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("DAIS.DataAccess.Entities.User", "Reciever")
+                        .WithMany()
+                        .HasForeignKey("RecieverId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("DivisionToSubDivisionMaterialTransfer");
+
+                    b.Navigation("Issuer");
+
+                    b.Navigation("Reciever");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionToSubDivisionMaterialTransferTrancation", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.Division", "Division")
+                        .WithMany()
+                        .HasForeignKey("DivisionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.DivisionToSubDivisionMaterialTransfer", "DivisionToSubDivisionMaterialTransfer")
+                        .WithMany("DivisionToSubDivisionMaterialTransferTrancation")
+                        .HasForeignKey("DivisionToSubDivisionMaterialTransferId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivision", "SubDivision")
+                        .WithMany()
+                        .HasForeignKey("SubDivisionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Division");
+
+                    b.Navigation("DivisionToSubDivisionMaterialTransfer");
+
+                    b.Navigation("Material");
+
+                    b.Navigation("SubDivision");
                 });
 
             modelBuilder.Entity("DAIS.DataAccess.Entities.LocationOperation", b =>
                 {
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivision", "SubDivision")
+                        .WithMany()
+                        .HasForeignKey("SubDivisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DAIS.DataAccess.Entities.WorkPackage", "WorkPackage")
                         .WithMany()
                         .HasForeignKey("WorkPackageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("SubDivision");
 
                     b.Navigation("WorkPackage");
                 });
@@ -1991,12 +3127,8 @@ namespace DAIS.DataAccess.Migrations
                         .HasForeignKey("BulkUploadDetailId");
 
                     b.HasOne("DAIS.DataAccess.Entities.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId");
-
-                    b.HasOne("DAIS.DataAccess.Entities.Category", null)
                         .WithMany("Materials")
-                        .HasForeignKey("CategoryId1");
+                        .HasForeignKey("CategoryId");
 
                     b.HasOne("DAIS.DataAccess.Entities.Contractor", "Contractor")
                         .WithMany("Materials")
@@ -2007,22 +3139,14 @@ namespace DAIS.DataAccess.Migrations
                         .HasForeignKey("DivisionId");
 
                     b.HasOne("DAIS.DataAccess.Entities.LocationOperation", "Location")
-                        .WithMany()
+                        .WithMany("Assets")
                         .HasForeignKey("LocationId");
 
-                    b.HasOne("DAIS.DataAccess.Entities.LocationOperation", null)
-                        .WithMany("Assets")
-                        .HasForeignKey("LocationOperationId");
-
                     b.HasOne("DAIS.DataAccess.Entities.Manufacturer", "Manufacturer")
-                        .WithMany()
+                        .WithMany("Assets")
                         .HasForeignKey("ManufacturerId");
 
-                    b.HasOne("DAIS.DataAccess.Entities.Manufacturer", null)
-                        .WithMany("Assets")
-                        .HasForeignKey("ManufacturerId1");
-
-                    b.HasOne("DAIS.DataAccess.Entities.MaterialType", null)
+                    b.HasOne("DAIS.DataAccess.Entities.MaterialType", "MaterialType")
                         .WithMany("Materials")
                         .HasForeignKey("MaterialTypeId");
 
@@ -2031,28 +3155,12 @@ namespace DAIS.DataAccess.Migrations
                         .HasForeignKey("MeasurementId");
 
                     b.HasOne("DAIS.DataAccess.Entities.Region", "Region")
-                        .WithMany()
+                        .WithMany("Assets")
                         .HasForeignKey("RegionId");
 
-                    b.HasOne("DAIS.DataAccess.Entities.Region", null)
-                        .WithMany("Assets")
-                        .HasForeignKey("RegionId1");
-
-                    b.HasOne("DAIS.DataAccess.Entities.SubDivision", "SubDivision")
-                        .WithMany()
-                        .HasForeignKey("SubDivisionId");
-
                     b.HasOne("DAIS.DataAccess.Entities.Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId");
-
-                    b.HasOne("DAIS.DataAccess.Entities.Supplier", null)
                         .WithMany("Materials")
-                        .HasForeignKey("SupplierId1");
-
-                    b.HasOne("DAIS.DataAccess.Entities.MaterialType", "MaterialType")
-                        .WithMany()
-                        .HasForeignKey("TypeId");
+                        .HasForeignKey("SupplierId");
 
                     b.HasOne("DAIS.DataAccess.Entities.WorkPackage", "WorkPackage")
                         .WithMany()
@@ -2076,8 +3184,6 @@ namespace DAIS.DataAccess.Migrations
 
                     b.Navigation("Region");
 
-                    b.Navigation("SubDivision");
-
                     b.Navigation("Supplier");
 
                     b.Navigation("WorkPackage");
@@ -2090,14 +3196,10 @@ namespace DAIS.DataAccess.Migrations
                         .HasForeignKey("ApproverId");
 
                     b.HasOne("DAIS.DataAccess.Entities.Material", "Material")
-                        .WithMany()
+                        .WithMany("MaterialApprovals")
                         .HasForeignKey("MaterialId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("DAIS.DataAccess.Entities.Material", null)
-                        .WithMany("MaterialApprovals")
-                        .HasForeignKey("MaterialId1");
 
                     b.HasOne("DAIS.DataAccess.Entities.User", "Reveiwer")
                         .WithMany()
@@ -2196,6 +3298,10 @@ namespace DAIS.DataAccess.Migrations
 
             modelBuilder.Entity("DAIS.DataAccess.Entities.MaterialMaintenance", b =>
                 {
+                    b.HasOne("DAIS.DataAccess.Entities.Agency", "Agency")
+                        .WithMany()
+                        .HasForeignKey("AgencyId");
+
                     b.HasOne("DAIS.DataAccess.Entities.Material", "Material")
                         .WithMany()
                         .HasForeignKey("MaterialId")
@@ -2205,6 +3311,8 @@ namespace DAIS.DataAccess.Migrations
                     b.HasOne("DAIS.DataAccess.Entities.MaterialServiceProvider", null)
                         .WithMany("MaterialMaintenance")
                         .HasForeignKey("MaterialServiceProviderId");
+
+                    b.Navigation("Agency");
 
                     b.Navigation("Material");
                 });
@@ -2254,7 +3362,7 @@ namespace DAIS.DataAccess.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("DAIS.DataAccess.Entities.MaterialVoucherTrancation", b =>
+            modelBuilder.Entity("DAIS.DataAccess.Entities.MaterialVoucherTransaction", b =>
                 {
                     b.HasOne("DAIS.DataAccess.Entities.LocationOperation", "Location")
                         .WithMany()
@@ -2269,20 +3377,39 @@ namespace DAIS.DataAccess.Migrations
                         .IsRequired();
 
                     b.HasOne("DAIS.DataAccess.Entities.MaterialIssueRecieveVoucher", "MaterialIssueRecieveVoucher")
-                        .WithMany()
+                        .WithMany("MaterialVoucherTransactions")
                         .HasForeignKey("MaterialIssueRecieveVoucherId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.HasOne("DAIS.DataAccess.Entities.MaterialIssueRecieveVoucher", null)
-                        .WithMany("MaterialVoucherTrancations")
-                        .HasForeignKey("MaterialIssueRecieveVoucherId1");
 
                     b.Navigation("Location");
 
                     b.Navigation("Material");
 
                     b.Navigation("MaterialIssueRecieveVoucher");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.MaterialVoucherTransactionApproval", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.User", "Issuer")
+                        .WithMany()
+                        .HasForeignKey("IssuerId");
+
+                    b.HasOne("DAIS.DataAccess.Entities.MaterialIssueRecieveVoucher", "MaterialIssueRecieveVoucher")
+                        .WithMany()
+                        .HasForeignKey("MaterialIssueRecieveVoucherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.User", "Reciever")
+                        .WithMany()
+                        .HasForeignKey("RecieverId");
+
+                    b.Navigation("Issuer");
+
+                    b.Navigation("MaterialIssueRecieveVoucher");
+
+                    b.Navigation("Reciever");
                 });
 
             modelBuilder.Entity("DAIS.DataAccess.Entities.MaterialWarranty", b =>
@@ -2342,9 +3469,187 @@ namespace DAIS.DataAccess.Migrations
                 {
                     b.HasOne("DAIS.DataAccess.Entities.Division", "Division")
                         .WithMany()
-                        .HasForeignKey("DivisionId");
+                        .HasForeignKey("DivisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Division");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionMaterialTransfer", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivision", "IssueSubDivision")
+                        .WithMany()
+                        .HasForeignKey("IssueSubDivisionId")
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivision", "OnBoardedSubDivision")
+                        .WithMany()
+                        .HasForeignKey("OnBoardedSubDivisionId");
+
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivision", "RecieveSubDivision")
+                        .WithMany()
+                        .HasForeignKey("RecieveSubDivisionId")
+                        .IsRequired();
+
+                    b.Navigation("IssueSubDivision");
+
+                    b.Navigation("Material");
+
+                    b.Navigation("OnBoardedSubDivision");
+
+                    b.Navigation("RecieveSubDivision");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionMaterialTransferApproval", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.User", "Issuer")
+                        .WithMany()
+                        .HasForeignKey("IssuerId");
+
+                    b.HasOne("DAIS.DataAccess.Entities.User", "Reciever")
+                        .WithMany()
+                        .HasForeignKey("RecieverId");
+
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivisionMaterialTransfer", "SubDivisionMaterialTransfer")
+                        .WithMany()
+                        .HasForeignKey("SubDivisionMaterialTransferId")
+                        .IsRequired();
+
+                    b.Navigation("Issuer");
+
+                    b.Navigation("Reciever");
+
+                    b.Navigation("SubDivisionMaterialTransfer");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionMaterialTransferTransaction", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivision", "SubDivision")
+                        .WithMany()
+                        .HasForeignKey("SubDivisionId")
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivisionMaterialTransfer", "SubDivisionMaterialTransfer")
+                        .WithMany("SubDivisionMaterialTransferTrancations")
+                        .HasForeignKey("SubDivisionMaterialTransferId")
+                        .IsRequired();
+
+                    b.Navigation("Material");
+
+                    b.Navigation("SubDivision");
+
+                    b.Navigation("SubDivisionMaterialTransfer");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionToDivisionMaterialTransfer", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivision", "IssueSubDivision")
+                        .WithMany()
+                        .HasForeignKey("IssueSubDivisionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivision", "OnBoardedSubDivision")
+                        .WithMany()
+                        .HasForeignKey("OnBoardedSubDivisionId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("DAIS.DataAccess.Entities.Division", "RecieveDivision")
+                        .WithMany()
+                        .HasForeignKey("RecieveDivisionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("IssueSubDivision");
+
+                    b.Navigation("Material");
+
+                    b.Navigation("OnBoardedSubDivision");
+
+                    b.Navigation("RecieveDivision");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionToDivisionMaterialTransferApproval", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.User", "Issuer")
+                        .WithMany()
+                        .HasForeignKey("IssuerId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("DAIS.DataAccess.Entities.User", "Reciever")
+                        .WithMany()
+                        .HasForeignKey("RecieverId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivisionToDivisionMaterialTransfer", "SubDivisionToDivisionMaterialTransfer")
+                        .WithMany()
+                        .HasForeignKey("SubDivToDivMaterialTransferApprovalId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Issuer");
+
+                    b.Navigation("Reciever");
+
+                    b.Navigation("SubDivisionToDivisionMaterialTransfer");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionToDivisionMaterialTransferTrancation", b =>
+                {
+                    b.HasOne("DAIS.DataAccess.Entities.Division", "Division")
+                        .WithMany()
+                        .HasForeignKey("DivisionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivisionToDivisionMaterialTransfer", "SubDivisionToDivisionMaterialTransfer")
+                        .WithMany()
+                        .HasForeignKey("SubDivToDivMaterialTransferId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivision", "SubDivision")
+                        .WithMany()
+                        .HasForeignKey("SubDivisionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAIS.DataAccess.Entities.SubDivisionToDivisionMaterialTransfer", null)
+                        .WithMany("SubDivisionToDivisionMaterialTransferTrancations")
+                        .HasForeignKey("SubDivisionToDivisionMaterialTransferId");
+
+                    b.Navigation("Division");
+
+                    b.Navigation("Material");
+
+                    b.Navigation("SubDivision");
+
+                    b.Navigation("SubDivisionToDivisionMaterialTransfer");
                 });
 
             modelBuilder.Entity("DAIS.DataAccess.Entities.Supplier", b =>
@@ -2364,10 +3669,6 @@ namespace DAIS.DataAccess.Migrations
 
             modelBuilder.Entity("DAIS.DataAccess.Entities.User", b =>
                 {
-                    b.HasOne("DAIS.DataAccess.Entities.LocationOperation", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId");
-
                     b.HasOne("DAIS.DataAccess.Entities.Project", "Project")
                         .WithMany()
                         .HasForeignKey("ProjectId");
@@ -2376,17 +3677,9 @@ namespace DAIS.DataAccess.Migrations
                         .WithMany()
                         .HasForeignKey("RegionId");
 
-                    b.HasOne("DAIS.DataAccess.Entities.SubDivision", "SubDivision")
-                        .WithMany()
-                        .HasForeignKey("SubDivisionId");
-
-                    b.Navigation("Location");
-
                     b.Navigation("Project");
 
                     b.Navigation("Region");
-
-                    b.Navigation("SubDivision");
                 });
 
             modelBuilder.Entity("DAIS.DataAccess.Entities.WorkPackage", b =>
@@ -2466,6 +3759,21 @@ namespace DAIS.DataAccess.Migrations
                     b.Navigation("Assets");
                 });
 
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionLocationMaterialTransfer", b =>
+                {
+                    b.Navigation("DivisionLocationMaterialTransferTrancations");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionMaterialTransfer", b =>
+                {
+                    b.Navigation("DivisionMaterialTransferTrancations");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.DivisionToSubDivisionMaterialTransfer", b =>
+                {
+                    b.Navigation("DivisionToSubDivisionMaterialTransferTrancation");
+                });
+
             modelBuilder.Entity("DAIS.DataAccess.Entities.DocumentType", b =>
                 {
                     b.Navigation("MaterialDocuments");
@@ -2490,7 +3798,7 @@ namespace DAIS.DataAccess.Migrations
 
             modelBuilder.Entity("DAIS.DataAccess.Entities.MaterialIssueRecieveVoucher", b =>
                 {
-                    b.Navigation("MaterialVoucherTrancations");
+                    b.Navigation("MaterialVoucherTransactions");
                 });
 
             modelBuilder.Entity("DAIS.DataAccess.Entities.MaterialServiceProvider", b =>
@@ -2508,6 +3816,16 @@ namespace DAIS.DataAccess.Migrations
             modelBuilder.Entity("DAIS.DataAccess.Entities.Region", b =>
                 {
                     b.Navigation("Assets");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionMaterialTransfer", b =>
+                {
+                    b.Navigation("SubDivisionMaterialTransferTrancations");
+                });
+
+            modelBuilder.Entity("DAIS.DataAccess.Entities.SubDivisionToDivisionMaterialTransfer", b =>
+                {
+                    b.Navigation("SubDivisionToDivisionMaterialTransferTrancations");
                 });
 
             modelBuilder.Entity("DAIS.DataAccess.Entities.Supplier", b =>

@@ -2,8 +2,13 @@
 {
     public class DivisionDto
     {
+        private string divisionName;
         public Guid Id {  get; set; }
-        public string DivisionName { get; set; }
+        public string DivisionName
+        {
+            get => divisionName;
+            set => divisionName = value?.ToUpper();
+        }
         public string DivisionCode { get; set; }
         public string Remarks {  get; set; }
         public Guid? LocationId { get; set; }

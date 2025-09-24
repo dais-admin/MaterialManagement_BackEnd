@@ -1,16 +1,11 @@
 ﻿using DAIS.DataAccess.Helpers;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DAIS.DataAccess.Entities
 {
     public class MaterialApproval:BaseEntity
     {
         public ApprovalStatus ApprovalStatus { get; set; }
-        public string? SubmitterId { get; set; }
-        public virtual User Submitter { get; set; }
-        public string? ReveiwerId { get; set; }
-        public virtual User Reveiwer { get; set; }
-        public string? ApproverId { get; set; }
-        public virtual User Approver { get; set; }
         public DateTime? ReviewedDate { get; set; }       
         public DateTime? ApprovedDate { get; set; }
         public string? ReviewerComment { get; set; }
@@ -18,8 +13,23 @@ namespace DAIS.DataAccess.Entities
         public string? ReviewerPreviousComment { get; set; }
         public string? ApproverComment { get; set; }
         public string? ApproverPreviousComment { get; set; }
+        public bool? IsActive { get; set; } = true;
+
+        [ForeignKey("SubmitterId")]
+        public string? SubmitterId { get; set; }
+        public virtual User Submitter { get; set; }
+
+        [ForeignKey("ReveiwerId")]
+        public string? ReveiwerId { get; set; }
+        public virtual User Reveiwer { get; set; }
+
+        [ForeignKey("ApproverId")]
+        public string? ApproverId { get; set; }
+        public virtual User Approver { get; set; }
+
+        [ForeignKey("MaterialId")]
         public Guid MaterialId { get; set; }
         public virtual Material Material { get; set; }
-        public bool? IsActive { get; set; } = true;
+       
     }
 }

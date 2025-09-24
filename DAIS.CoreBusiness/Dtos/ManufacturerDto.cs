@@ -3,8 +3,14 @@ namespace DAIS.CoreBusiness.Dtos
 {
     public  class ManufacturerDto
     {
-        public Guid Id { get; set; } 
-        public string ManufacturerName { get; set; }
+       
+        private string manufacturerName;
+        public Guid Id { get; set; }
+        public string ManufacturerName
+        {
+            get => manufacturerName;
+            set => manufacturerName = value?.ToUpper();
+        }
         public string ManufacturerAddress { get; set; }
         public string ProductsDetails { get; set; }
         public string ImportantDetails { get; set; }

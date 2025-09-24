@@ -25,10 +25,10 @@ namespace DAIS.DataAccess.Entities
         public virtual Material Material { get; set; }
         public int Stock { get; set; }
 
-        public virtual ICollection<MaterialVoucherTrancation> MaterialVoucherTrancations { get; set; }
+        public virtual ICollection<MaterialVoucherTransaction> MaterialVoucherTransactions { get; set; }
     }
 
-    public class MaterialVoucherTrancation : BaseEntity
+    public class MaterialVoucherTransaction : BaseEntity
     {
 
         public Guid LocationId { get; set; }
@@ -46,5 +46,15 @@ namespace DAIS.DataAccess.Entities
 
     }
 
+    public class MaterialVoucherTransactionApproval: BaseEntity
+    {
+        public Guid MaterialIssueRecieveVoucherId {  get; set; }
+        public MaterialIssueRecieveVoucher MaterialIssueRecieveVoucher {  get; set; }     
+        public string IssuerId { get; set; }
+        public virtual User Issuer { get; set; }
+        public string RecieverId { get; set; }
+        public virtual User Reciever { get; set; }
+        public ApprovalStatus ApprovalStatus { get; set; }
+    }
 }
     

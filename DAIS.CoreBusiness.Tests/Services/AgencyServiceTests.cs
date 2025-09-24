@@ -30,7 +30,7 @@ namespace DAIS.CoreBusiness.Tests.Services
             // Arrange
             var agencyDto = new AgencyDto 
             { 
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 AgencyCode = "TEST001",
                 AgencyName = "Test Agency",
                 AgencyType = "Test Type"
@@ -127,7 +127,7 @@ namespace DAIS.CoreBusiness.Tests.Services
             // Arrange
             var agencyDto = new AgencyDto
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 AgencyCode = "TEST001",
                 AgencyName = "Test Agency",
                 AgencyType = "Test Type"

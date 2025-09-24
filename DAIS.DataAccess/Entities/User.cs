@@ -14,10 +14,9 @@ namespace DAIS.DataAccess.Entities
         public string UserPhoto {  get; set; }
         public Guid? RegionId { get; set; }
         public virtual Region Region { get; set; }
-        public Guid? LocationId { get; set; }
-        public virtual LocationOperation Location { get; set; }
+        public Guid? DivisionId { get; set; }
         public Guid? SubDivisionId { get; set; }
-        public virtual SubDivision SubDivision { get; set; }
+        public Guid? LocationId { get; set; }
         public Guid? ProjectId { get; set; }
         public virtual Project Project { get; set; }
     }    

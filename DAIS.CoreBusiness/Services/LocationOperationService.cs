@@ -38,6 +38,7 @@ namespace DAIS.CoreBusiness.Services
                     .Where(x=>x.Id== id)
                     .Include(x => x.WorkPackage)
                     .Include(x => x.WorkPackage.Project)
+                    .Include(x=>x.SubDivision)
                     .FirstOrDefaultAsync().ConfigureAwait(false);
                 locationOperationDto = _mapper.Map<LocationOperationDto>(locationOperation);
                 
@@ -122,7 +123,7 @@ namespace DAIS.CoreBusiness.Services
                 var locationOperationList = await _genericRepo.Query()
                     .Include(x=>x.WorkPackage)
                     .Include(x=>x.WorkPackage.Project)
-                    
+                    .Include(x=>x.SubDivision)
                     .ToListAsync().ConfigureAwait(false);
                 var locationDtoList = _mapper.Map<List<LocationOperationDto>>(locationOperationList);
                 locationOperationDtoList.AddRange(locationDtoList);
@@ -147,6 +148,7 @@ namespace DAIS.CoreBusiness.Services
                 var locations = await _genericRepo.Query()
                     .Where(x => x.WorkPackageId == workPackageId)
                     .Include(x => x.WorkPackage)
+                    .Include(x=>x.SubDivision)
                     .ToListAsync().ConfigureAwait(false);
                 locationOperationDtoList.AddRange(_mapper.Map<List<LocationOperationDto>>(locations));
 
@@ -161,6 +163,30 @@ namespace DAIS.CoreBusiness.Services
             return locationOperationDtoList;
         }
 
+        public async Task<List<LocationOperationDto>> GetLocationsBySubDivisionId(Guid subDivisionId)
+        {
+            _logger.LogInformation("LocationOperationService:GetLocationsBySubDivisionId:Method Start");
+            List<LocationOperationDto> locationOperationDtoList = new List<LocationOperationDto>();
+            try
+            {
+                var locations = await _genericRepo.Query()
+                    .Where(x => x.SubDivisionId == subDivisionId)
+                    .Include(x => x.WorkPackage)
+                    .Include(x => x.SubDivision)
+                    .ToListAsync().ConfigureAwait(false);
+                locationOperationDtoList.AddRange(_mapper.Map<List<LocationOperationDto>>(locations));
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                throw ex;
+
+            }
+            _logger.LogInformation("LocationOperationService:GetLocationsBySubDivisionId:Method End");
+            return locationOperationDtoList;
+        }
+
         public LocationOperationDto GetLocationIdByName(string name,string system)
         {
             _logger.LogInformation("LocationOperationService:GetLocationIdByName:Method Start");
@@ -169,7 +195,7 @@ namespace DAIS.CoreBusiness.Services
             {
 
                 var locationOperation =  _genericRepo.Query()
-                    .FirstOrDefault(x=>x.LocationOperationName==name
+                    .FirstOrDefault(x=>x.LocationOperationName.ToLower() == name.ToLower()
                     && x.System==system);
                 locationOperationDto = _mapper.Map<LocationOperationDto>(locationOperation);
 

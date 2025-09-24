@@ -111,7 +111,7 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var materialType = _genericRepo.Query()
-                    .FirstOrDefault(x => x.TypeName==name);
+                    .FirstOrDefault(x => x.TypeName.ToLower() == name.ToLower());
                materialTypeDto = _mapper.Map<MaterialTypeDto>(materialType);
 
 

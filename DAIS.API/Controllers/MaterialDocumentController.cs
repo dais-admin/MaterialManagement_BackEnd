@@ -7,6 +7,8 @@ using static System.Net.Mime.MediaTypeNames;
 using System.IO;
 using DAIS.Infrastructure.Cryptography;
 using Microsoft.AspNetCore.Authorization;
+using System.Text;
+using DAIS.CoreBusiness.Services;
 
 namespace DAIS.API.Controllers
 {
@@ -17,15 +19,16 @@ namespace DAIS.API.Controllers
     {
         private readonly IMaterialDocumentService _materialDocumentService;
         private readonly MaterialConfigSettings _materialConfig;
-        private readonly IFileEncryptionService _fileEncryptionService;
-
+        private readonly IFileManagerService _fileManagerService;
         private string _filePath = string.Empty;
         private string _fileName = string.Empty;
-        public MaterialDocumentController(IMaterialDocumentService materialDocumentService, IOptions<MaterialConfigSettings> materialConfig, IFileEncryptionService fileEncryptionService)
+        public MaterialDocumentController(IMaterialDocumentService materialDocumentService, 
+            IOptions<MaterialConfigSettings> materialConfig,
+            IFileManagerService fileManagerService)
         {
             _materialDocumentService = materialDocumentService;
             _materialConfig = materialConfig.Value;
-            _fileEncryptionService = fileEncryptionService;
+            _fileManagerService = fileManagerService;
         }
         [HttpGet("GetAllMaterialDocumnet")]
         public async Task<IActionResult> GetAllMaterialDocumnet()
@@ -37,50 +40,25 @@ namespace DAIS.API.Controllers
         {
             return Ok(await _materialDocumentService.GetAllMaterialDocumentByMaterialIdAsync(materialId));
         }
-        [HttpGet, DisableRequestSizeLimit]
-        [Route("download")]
-        public async Task<IActionResult> DownloadFile([FromQuery] string fileUrl)
-        {
-            var filePath = _materialConfig.DocumentBasePath + fileUrl;
-            if (!System.IO.File.Exists(filePath))
-                return NotFound();
-            //Get Bytes array of your file, you can also to do a MemoryStream
-            //Byte[] bytes = await System.IO.File.ReadAllBytesAsync(filePath);
-            var decryptedFilePath = Path.Combine("decrypted_files", Path.GetFileName(filePath));
-
-            // Decrypt file
-            await _fileEncryptionService.DecryptFileAsync(filePath, decryptedFilePath);
-
-            var fileBytes = await System.IO.File.ReadAllBytesAsync(decryptedFilePath);
-            System.IO.File.Delete(decryptedFilePath); // Clean up the decrypted file
-            //Return your FileContentResult
-            return File(fileBytes, "application/octet-stream", "File1");
-
-        }
-        [HttpGet("download/{fileUrl}")]
-        public async Task<IActionResult> Download(string fileUrl)
-        {
-            //Or We can impleplies  API/method with dbcontenxt, need to be pass id and get all details of the file
-            var filePath = _materialConfig.DocumentBasePath + fileUrl;
-
-            if (!System.IO.File.Exists(filePath))
-                return NotFound();
-
-            var decryptedFilePath = Path.Combine("decrypted_files", Path.GetFileName(filePath));
-
-            // Decrypt file
-            await _fileEncryptionService.DecryptFileAsync(filePath, decryptedFilePath);
-
-            var fileBytes = await System.IO.File.ReadAllBytesAsync(decryptedFilePath);
-            System.IO.File.Delete(decryptedFilePath); // Clean up the decrypted file
-
-            return File(fileBytes, "application/octet-stream", "FileName");
-        }
+        
         [HttpPost("upload")]
         public async Task<IActionResult> AddMaterialDocument(DocumentDto documentDto)
         {
             List<MaterialDocumentDto> materialDocumentDtoList = await SaveFile(documentDto);
             return Ok(materialDocumentDtoList);
+        }
+        [HttpGet("download-encrypted/{encodedPath}")]
+        public async Task<IActionResult> DownloadEncrypted(string encodedPath)
+        {
+            // 1. Decode Base64 string to original file path
+            var base64EncodedBytes = Convert.FromBase64String(encodedPath);
+            var decodedPath = Encoding.UTF8.GetString(base64EncodedBytes);          
+            var (stream, isSucess) = await _fileManagerService.GetEncryptedFile(decodedPath);
+
+            if (!isSucess)
+                return NotFound("File not found.");
+
+            return File(stream, "application/octet-stream", decodedPath);
         }
         [HttpDelete]
         public async Task<IActionResult> DeleteMaterialDocument(Guid documentId)
@@ -121,9 +99,8 @@ namespace DAIS.API.Controllers
                 }
                 else
                 {
-                   //await _fileEncryptionService.EncryptFileAsync(document, fullFilePath).ConfigureAwait(false);
-
-                    await document.CopyToAsync(new FileStream(fullFilePath, FileMode.Create));
+                      var (isSucces,savedFile)=  await _fileManagerService.UploadAndEncryptFile(document, dir);
+                     
                     if (documentDto.FileAction == "None" || documentDto.FileAction == "Keep")
                     {
                         materialDocumentDto = await SaveFileMetaData(documentDto);
@@ -150,13 +127,6 @@ namespace DAIS.API.Controllers
         }
        
         
-        private string GetUniqueFileName(string fileName)
-        {
-            fileName = Path.GetFileName(fileName);
-            return Path.GetFileNameWithoutExtension(fileName)
-                   + "_"
-                   + Guid.NewGuid().ToString().Substring(0, 4)
-                   + Path.GetExtension(fileName);
-        }
+        
     }
 }

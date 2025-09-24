@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace DAIS.API.Controllers
 {
@@ -15,12 +16,14 @@ namespace DAIS.API.Controllers
     [Authorize]
     public class SupplierController : ControllerBase
     {
-        private readonly ISupplierService _supplierService;
-        private readonly MaterialConfigSettings _materialConfig;
-        public SupplierController(ISupplierService supplierService, IOptions<MaterialConfigSettings> materialConfig)
+        private readonly ISupplierService _supplierService;    
+        private readonly IFileManagerService _fileManagerService;
+        private readonly string folderName = "MaterialDocument" + "\\" + "SupplierDocuments" + "\\";
+        public SupplierController(ISupplierService supplierService,             
+            IFileManagerService fileManagerService)
         {
             _supplierService = supplierService;
-            _materialConfig = materialConfig.Value;
+            _fileManagerService = fileManagerService;
         }
         [HttpGet("GetAllSupplier")]
         public async Task<IActionResult> GetAllSupplier()
@@ -35,35 +38,49 @@ namespace DAIS.API.Controllers
             return Ok(listSupplier);
         }
         [HttpPost]
-        public async Task<IActionResult> AddSupplier([FromForm] IFormFile? supplierDocument, [FromForm] string supplierData)
+        public async Task<IActionResult> AddSupplier(List<IFormFile> supplierDocuments, [FromForm] string supplierData)
         {
             if (supplierData == null || string.IsNullOrEmpty(supplierData))
             {
                 return BadRequest();
             }
             var supplierDto = JsonConvert.DeserializeObject<SupplierDto>(supplierData);
-
-            if (supplierDocument != null)
+            if (supplierDocuments.Count>0)
             {
-                supplierDto.SupplierDocument = await SaveSupplierDocument(supplierDocument);
+                StringBuilder uploadedFiles = new StringBuilder();
+                foreach (var supplierDocumentFile in supplierDocuments)
+                {
+                    var (isSucess, savedFile) = await _fileManagerService.UploadAndEncryptFile(supplierDocumentFile, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
+                }
+                supplierDto.SupplierDocument = uploadedFiles.ToString();
             }
+            
             var response = await _supplierService.AddSupplier(supplierDto);
             return Ok(response);
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateSupplier([FromForm] IFormFile? supplierDocument, [FromForm] string supplierData)
+        public async Task<IActionResult> UpdateSupplier(List<IFormFile> supplierDocuments, [FromForm] string supplierData)
         {
             if (supplierData == null || string.IsNullOrEmpty(supplierData))
             {
                 return BadRequest();
             }
             var supplierDto = JsonConvert.DeserializeObject<SupplierDto>(supplierData);
-
-            if (supplierDocument != null)
+            if (supplierDocuments.Count > 0)
             {
-                supplierDto.SupplierDocument = await SaveSupplierDocument(supplierDocument);
+                StringBuilder uploadedFiles = new StringBuilder();
+                foreach (var supplierDocumentFile in supplierDocuments)
+                {
+                    var (isSucess, savedFile) = await _fileManagerService.UploadAndEncryptFile(supplierDocumentFile, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
+                }
+                supplierDto.SupplierDocument = uploadedFiles.ToString();
             }
+
             var response = await _supplierService.UpdateSupplier(supplierDto);
             return Ok(response);
         }
@@ -74,23 +91,19 @@ namespace DAIS.API.Controllers
             await _supplierService.DeleteSupplier(id);
             return Ok();
         }
-        private async Task<string> SaveSupplierDocument([FromForm] IFormFile? documentFile)
-        {
-            var folderName = "MaterialDocument" + "\\" + "SupplierDocuments" + "\\";
-            var basePath = _materialConfig.DocumentBasePath;
-            string fileName = string.Empty;
-            string filePath = string.Empty;
-            fileName = documentFile.FileName;
-            var dir = Path.Combine(basePath, folderName);
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-            filePath = Path.Combine(folderName, fileName);
-            var fullFilePath = Path.Combine(dir, fileName);
-            await documentFile.CopyToAsync(new FileStream(fullFilePath, FileMode.Create));
 
-            return filePath;
+        [HttpGet("download-encrypted/{encodedPath}")]
+        public async Task<IActionResult> DownloadEncrypted(string encodedPath)
+        {
+            var base64EncodedBytes = Convert.FromBase64String(encodedPath);
+            var decodedPath = Encoding.UTF8.GetString(base64EncodedBytes);          
+            var (stream,isSicess) = await _fileManagerService.GetEncryptedFile(decodedPath);
+
+            if (!isSicess)
+                return NotFound("File not found.");
+
+            return File(stream, "application/octet-stream", decodedPath);
         }
+       
     }
 }

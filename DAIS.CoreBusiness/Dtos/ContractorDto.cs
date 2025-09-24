@@ -8,8 +8,14 @@ namespace DAIS.CoreBusiness.Dtos
 {
     public class ContractorDto
     {
+        private string contractorName;
         public Guid Id { get; set; }
-        public string ContractorName { get; set; }
+
+        public string ContractorName
+        {
+            get => contractorName;
+            set => contractorName = value?.ToUpper();
+        }
         public string ContractorAddress { get; set; }
         public string ProductsDetails { get; set; }
         public string Remarks { get; set; }

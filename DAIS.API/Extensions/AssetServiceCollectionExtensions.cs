@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿﻿﻿﻿﻿﻿using AutoMapper;
 using DAIS.API.ExcelReader;
 using DAIS.API.Helpers;
 using DAIS.CoreBusiness.Extensions;
@@ -20,8 +20,9 @@ namespace DAIS.API.Extensions
     {
         public static IServiceCollection AddAssetCollectionServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddBusinessCollectionServices();
+            services.AddBusinessCollectionServices();        
             services.AddSingleton<IFileEncryptionService, FileEncryptionService>();
+            services.AddScoped<IApplicationDataBackupService, ApplicationDataBackupService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IWorkPackageService,WorkPackageService>();
             services.AddScoped<IMaterialTypeService, MaterialTypeService>();
@@ -56,7 +57,14 @@ namespace DAIS.API.Extensions
             services.AddScoped<IMaterialAuditService, MaterialAuditService>();  
             services.AddScoped<IExcelDataImporter, ExcelDataImporter>();
             services.AddScoped<IExcelFileStorageService, ExcelFileStorageService>();
+            services.AddScoped<IMaterialTransferService, MaterialTransferService>();
+            services.AddScoped<IDivisionMaterialTransferService, DivisionMaterialTransferService>();
+            services.AddScoped<ISubDivisionMaterialTransferService, SubDivisionMaterialTransferService>();
+            services.AddScoped<IDivisionLocationMaterialTransferService, DivisionLocationMaterialTransferService>();
+            services.AddScoped<IDivisionToSubDivisionMaterialTransferService, DivisionToSubDivisionMaterialTransferService>();
+            services.AddScoped<ISubDivisionToDivisionMaterialTransferService, SubDivisionToDivisionMaterialTransferService>();
 
+            services.AddScoped<IFileManagerService, FileManagerService>();
 
             services.AddScoped<MaterialServiceDependencies>(provider =>
             new MaterialServiceDependencies(
@@ -87,7 +95,7 @@ namespace DAIS.API.Extensions
             services.Configure<MaterialConfigSettings>(configuration.GetSection("MaterialConfig"));
             services.Configure<JwtTokenSettings>(configuration.GetSection("JwtTokenSettings"));
             services.Configure<MailSettings>(configuration.GetSection(MailSettings.SectionName));
-
+            services.Configure<FileSettings>(configuration.GetSection("FileSettings"));
 
             return services;
         }

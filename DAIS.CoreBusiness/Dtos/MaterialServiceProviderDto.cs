@@ -9,8 +9,15 @@ namespace DAIS.CoreBusiness.Dtos
 {
     public  class MaterialServiceProviderDto
     {
-        public Guid Id {  get; set; }
-        public string ServiceProviderName { get; set; }
+       
+        private string serviceProviderName;
+        public Guid Id { get; set; }
+        public string ServiceProviderName
+        {
+            get => serviceProviderName;
+            set => serviceProviderName = value?.ToUpper();
+        }
+
         public string Address { get; set; }
         public string ContactNo { get; set; }
         public string ContactEmail { get; set; }
@@ -19,6 +26,7 @@ namespace DAIS.CoreBusiness.Dtos
         public Guid ManufacturerId { get; set; }
         public Guid? ContractorId { get; set; }
         public  ContractorDto? Contractor { get; set; }
+  
 
     }
 }

@@ -628,7 +628,7 @@ namespace DAIS.CoreBusiness.Services
                     || x.ApprovalStatus==ApprovalStatus.ApproverReturened || x.ApprovalStatus==ApprovalStatus.Submmitted)
                     .ToListAsync(),
 
-                var role when role == (UserTypes.SuperAdmin.ToString()) => await query
+                var role when role == (UserTypes.Admin.ToString()) => await query
                .Where(x => x.ApprovalStatus == ApprovalStatus.ReviewerRejected
                || x.ApprovalStatus == ApprovalStatus.ApproverRejected || x.ApprovalStatus == ApprovalStatus.Reviewed || x.ApprovalStatus == ApprovalStatus.Submmitted)
                .ToListAsync(),

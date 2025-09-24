@@ -132,7 +132,7 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var manufacturer = _genericRepo.Query()
-                 .FirstOrDefault(x => x.ManufacturerName==name);
+                 .FirstOrDefault(x => x.ManufacturerName.ToLower() == name.ToLower());
                 manufacturerDto = _mapper.Map<ManufacturerDto>(manufacturer);
 
             }

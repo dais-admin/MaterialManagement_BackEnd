@@ -38,7 +38,8 @@ internal class Program
         });
 
         builder.Services.AddHostedService<CpuUsageMonitoringService>();
-
+        builder.Services.AddHostedService<AppDataBackupService>();
+        builder.Services.AddHostedService<AppFileBackupService>();
 
         var app = builder.Build();
 
@@ -65,7 +66,7 @@ internal class Program
         app.UseRoleAndUserSeed();
 
         app.MapControllers();
-
+        
         app.UseEndpoints(endpoints =>
         {
             

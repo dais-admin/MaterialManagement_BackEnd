@@ -7,10 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using DAIS.DataAccess.Helpers;
 using Microsoft.Extensions.Logging;
 using DAIS.CoreBusiness.Dtos.Reports;
-using Azure;
-using DAIS.DataAccess.Repositories;
-using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml.Wordprocessing;
 using DAIS.CoreBusiness.Helpers;
 
 namespace DAIS.CoreBusiness.Services
@@ -19,7 +15,7 @@ namespace DAIS.CoreBusiness.Services
     {
         private readonly IGenericRepository<MaterialIssueRecieveVoucher> _repository;
         private readonly IGenericRepository<Material> _material;
-        private readonly IGenericRepository<MaterialVoucherTrancation> _trasaction;
+        private readonly IGenericRepository<MaterialVoucherTransaction> _trasaction;
         private readonly ILocationOperationService _locationOperationService;
         private readonly ILogger<MaterialIssueReceiveService> _logger;
         private readonly IMapper _mapper;
@@ -29,7 +25,7 @@ namespace DAIS.CoreBusiness.Services
             IGenericRepository<MaterialIssueRecieveVoucher> repository,
             IGenericRepository<Material> material,
            ILocationOperationService locationOperationService,
-            IGenericRepository<MaterialVoucherTrancation> trasaction,
+            IGenericRepository<MaterialVoucherTransaction> trasaction,
             ILogger<MaterialIssueReceiveService> logger, IMapper mapper
            )
         {
@@ -90,9 +86,14 @@ namespace DAIS.CoreBusiness.Services
             try
             {
 
+                materialIssueReceiveResponseDto =await CheckMaterialValidForIssueRecive(materialIssueReceiveDto.MaterialIssueReceiveItems);
+                if (!materialIssueReceiveResponseDto.IsIssueReceiveSucess)
+                {
+                    return materialIssueReceiveResponseDto;
+                }
                 foreach (MaterialIssueReceiveItemDto materialIssueReceiveItemDto in materialIssueReceiveDto.MaterialIssueReceiveItems)
                 {
-                    var voucherTrancations = new List<MaterialVoucherTrancation>();
+                    var voucherTrancations = new List<MaterialVoucherTransaction>();
 
 
                     var checkStock = await _repository.GetWhere(x => x.MaterialId == materialIssueReceiveItemDto.MaterialId
@@ -129,7 +130,7 @@ namespace DAIS.CoreBusiness.Services
                         materialIssueRecieveVoucher.IssuedQuantity = materialIssueReceiveItemDto.IssuedQuantity;
                         materialIssueRecieveVoucher.RecievedQuantity = 0;
 
-                        var list = new List<MaterialVoucherTrancation>{
+                        var list = new List<MaterialVoucherTransaction>{
 
                          new() {
                               Quantity = materialIssueReceiveItemDto.IssuedQuantity,
@@ -162,7 +163,7 @@ namespace DAIS.CoreBusiness.Services
 
                         materialIssueRecieveVoucher.RecievedQuantity = materialIssueReceiveItemDto.RecievedQuantity;
                         materialIssueRecieveVoucher.IssuedQuantity = 0;
-                        var list = new List<MaterialVoucherTrancation>
+                        var list = new List<MaterialVoucherTransaction>
                         {
 
                          new() {
@@ -197,7 +198,7 @@ namespace DAIS.CoreBusiness.Services
                         transaction.MaterialIssueRecieveVoucherId = materialIssueRecieveVoucher.Id;
                         await _trasaction.Add(transaction);
                     }
-                    materialIssueRecieveVoucher.MaterialVoucherTrancations = voucherTrancations;
+                    materialIssueRecieveVoucher.MaterialVoucherTransactions = voucherTrancations;
                     await UpdateStock(materialIssueRecieveVoucher);
 
                     materialIssueReceiveResponseDto.IsIssueReceiveSucess = true;
@@ -217,7 +218,7 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 int stock = 0, issuedQuantity = 0, recievedQuantity = 0;
-                foreach (var transaction in voucher.MaterialVoucherTrancations)
+                foreach (var transaction in voucher.MaterialVoucherTransactions)
                 {
                     if (transaction.VoucherType == VoucherType.Issue)
                     {
@@ -280,6 +281,42 @@ namespace DAIS.CoreBusiness.Services
             }
         }
 
+            
+        public async Task<MaterialIssueReceiveResponseDto> CheckMaterialValidForIssueRecive(List<MaterialIssueReceiveItemDto> materialIssueReceiveItems)
+        {
+            MaterialIssueReceiveResponseDto materialIssueReceiveResponseDto
+                = new MaterialIssueReceiveResponseDto();
+            foreach (MaterialIssueReceiveItemDto materialIssueReceiveItemDto in materialIssueReceiveItems)
+            {
+                var existingTransaction = await _trasaction.Query()
+                     .Include(x => x.Material)
+                     .Where(x => x.MaterialId == materialIssueReceiveItemDto.MaterialId)
+                     .ToListAsync();
+                materialIssueReceiveResponseDto.IsIssueReceiveSucess = true;
+                if (existingTransaction.Any())
+                {
+                    var issuedCount = existingTransaction.Sum(x => x.IssuedQuantity);
+                    var recivedCount = existingTransaction.Sum(x => x.RecievedQuantity);
+                    var balancyQuntity = issuedCount - recivedCount;
+                    var onboardedMaterial = existingTransaction.Select(x=>x.Material).FirstOrDefault();
+                    var onboardedQuntity = onboardedMaterial.MaterialQty;
+                    if ((balancyQuntity==0 || balancyQuntity == onboardedQuntity) 
+                        && materialIssueReceiveItemDto.VoucherType==VoucherType.Issue)
+                    {
+                        materialIssueReceiveResponseDto.IsIssueReceiveSucess = false;
+                        materialIssueReceiveResponseDto.Message = "No enough stock available for " + onboardedMaterial.MaterialName +" for issue";
+                        break;
+                    }
+                    if(materialIssueReceiveItemDto.VoucherType == VoucherType.Recieve && recivedCount == 0)
+                    {
+                        materialIssueReceiveResponseDto.IsIssueReceiveSucess = false;
+                        materialIssueReceiveResponseDto.Message = "No enough stock available for " + onboardedMaterial.MaterialName + " to recieve";
+                        break;
+                    }
+                }
+            }
+            return materialIssueReceiveResponseDto;
+        }
         public async Task<List<MaterialIssueReceiveDto>> GetAllMaterialIssueReceive()
         {
 
@@ -351,6 +388,8 @@ namespace DAIS.CoreBusiness.Services
         }
         public async Task<List<MaterialLocatoinIssueReceiveItemDto>> GetMaterialLocationIssueReceiveByDateRange(DateTime fromDate, DateTime toDate,Guid workPackageId)
         {
+            var startOfDay = fromDate.Date; // 00:00:00 of the given fromDate
+            var endOfDay = toDate.Date.AddDays(1).AddMilliseconds(-1);
             List<MaterialLocatoinIssueReceiveItemDto> materialLocatoinIssueReceiveItemList = new List<MaterialLocatoinIssueReceiveItemDto>(); ;
             try
             {
@@ -361,7 +400,7 @@ namespace DAIS.CoreBusiness.Services
                                     .Include(x=>x.Location)
                                     .ToListAsync();
 
-                var result = await _trasaction.Query().Where(v => v.CreatedDate >= fromDate && v.CreatedDate <= toDate)
+                var result = await _trasaction.Query().Where(v => v.CreatedDate >= startOfDay && v.CreatedDate <= endOfDay)
                            .GroupBy(ts => new { ts.MaterialId, ts.LocationId })
                            .Select(g => new
                            {
@@ -415,7 +454,7 @@ namespace DAIS.CoreBusiness.Services
 
                 foreach (var item in allMaterials)
                 {
-                    if (!result.Any(r => r.MaterialId == item.Id && r.LocationId == item.LocationId))
+                    if (item.LocationId != null && !result.Any(r => r.MaterialId == item.Id && r.LocationId == item.LocationId))
                     {
                         var locationReport = new MaterialLocatoinIssueReceiveItemDto()
                         {

@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace DAIS.DataAccess.Entities
 {
     public class MaterialHardware:BaseEntity
@@ -13,10 +15,16 @@ namespace DAIS.DataAccess.Entities
         public int Quantity { get; set; }
         public string? HardwareDocument {  get; set; }
         public string? Remarks { get; set; }
+
+        [ForeignKey("SupplierId")]
         public Guid? SupplierId { get; set; }
         public virtual Supplier Supplier { get; set; }
+
+        [ForeignKey("ManufacturerId")]
         public Guid ManufacturerId {  get; set; }
         public virtual Manufacturer Manufacturer { get; set; }
+
+        [ForeignKey("MaterialId")]
         public Guid MaterialId { get; set; }
         public virtual Material Material { get; set; }
         

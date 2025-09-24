@@ -135,7 +135,7 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var measurement = _genericRepo.Query()
-                    .FirstOrDefault(x=>x.MeasurementName==name);
+                    .FirstOrDefault(x=>x.MeasurementName.ToLower() == name.ToLower());
                 materialMeasuremetDto = _mapper.Map<MaterialMeasuremetDto>(measurement);
             }
             catch (Exception ex)

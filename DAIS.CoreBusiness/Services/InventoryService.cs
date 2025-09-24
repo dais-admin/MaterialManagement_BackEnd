@@ -34,18 +34,20 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var material = await _repoMaterial.Query().Where(x => x.MaterialCode == materialCode)
-                    .Include(x => x.MaterialType)
+                    
                     .Include(x => x.Category)
+                    .ThenInclude(x => x.MaterialType)
                     .Include(x => x.Region)
                     .Include(x => x.Manufacturer)
                     .Include(x => x.Location)
-                    .Include(x => x.Supplier)
-                    .Include(x => x.SubDivision)
+                    .ThenInclude(x => x.SubDivision)
+                    .ThenInclude(x => x.Division)
+                    .Include(x => x.Supplier) 
                     .Include(x=>x.WorkPackage)
                     .FirstOrDefaultAsync().ConfigureAwait(false);
                  var materialDto= _materialServiceInfrastructure.Mapper.Map<MaterialDto>(material);
                 //    materialDto.CategoryName = material.Category.CategoryName;
-                //materialDto.TypeName = material.MaterialType.TypeName;
+                 materialDto.MaterialType = _materialServiceInfrastructure.Mapper.Map<MaterialTypeDto>( material.Category.MaterialType);
                 //materialDto.ManufacturerName = material.Manufacturer.ManufacturerName;
                 var materialWarranty = await _repoMaterialWarranty.Query().Where(x => x.MaterialId == materialDto.Id)
                     .FirstOrDefaultAsync().ConfigureAwait(false);
@@ -70,8 +72,7 @@ namespace DAIS.CoreBusiness.Services
                 var existingMaterial = await _materialServiceInfrastructure.GenericRepository.GetById(materialDto.Id);
                 existingMaterial.MaterialName = materialDto.MaterialName;
                 existingMaterial.CategoryId = materialDto.CategoryId;
-                existingMaterial.TypeId= materialDto.TypeId;
-                existingMaterial.SubDivisionId = materialDto.SubDivisionId;
+                existingMaterial.TypeId= materialDto.TypeId;               
                 existingMaterial.RegionId = materialDto.RegionId;
                 existingMaterial.LocationId = materialDto.LocationId;
                 existingMaterial.WorkPackageId = materialDto.WorkPackageId;

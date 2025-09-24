@@ -9,8 +9,8 @@ namespace DAIS.Infrastructure.Cryptography
         private readonly byte[] iv;
         public FileEncryptionService()
         {
-            string keyBase64 = Environment.GetEnvironmentVariable("ENCRYPTION_KEY");
-            string ivBase64 = Environment.GetEnvironmentVariable("ENCRYPTION_IV");
+            string keyBase64 = "12345678901234567890123456789012"; //Environment.GetEnvironmentVariable("ENCRYPTION_KEY");
+            string ivBase64 =  "1234567890123456";//Environment.GetEnvironmentVariable("ENCRYPTION_IV");
 
             if (string.IsNullOrEmpty(keyBase64) || string.IsNullOrEmpty(ivBase64))
             {

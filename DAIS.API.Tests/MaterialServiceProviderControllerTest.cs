@@ -12,12 +12,14 @@ namespace DAIS.API.Tests
     {
         private readonly Mock<IMaterialServiceProviderService> _materialServiceProviderService;
         private readonly Mock<IOptions<MaterialConfigSettings>> configMock;
+        private readonly Mock<IFileManagerService> _fileManagerService;
         public MaterialServiceProviderControllerTest()
         {
             _materialServiceProviderService = new Mock<IMaterialServiceProviderService>();
             var _configData = new MaterialConfigSettings { DocumentBasePath = "TestConnectionString" };
             configMock = new Mock<IOptions<MaterialConfigSettings>>();
             configMock.Setup(x => x.Value).Returns(_configData);
+            _fileManagerService = new Mock<IFileManagerService>();
         }
 
         [Fact]       
@@ -27,7 +29,7 @@ namespace DAIS.API.Tests
             _materialServiceProviderService.Setup(x => x.GetServiceProviderByIdAsync(It.IsAny<Guid>()))
             .ReturnsAsync(serviceProviderDtoData[0]);
 
-            var materialServiceProviderController = new MaterialServiceProviderController(_materialServiceProviderService.Object, configMock.Object);
+            var materialServiceProviderController = new MaterialServiceProviderController(_materialServiceProviderService.Object, _fileManagerService.Object);
 
             var serviceProviderResult = await materialServiceProviderController.GetMaterialServiceProviderById(Guid.NewGuid());
 
@@ -43,7 +45,7 @@ namespace DAIS.API.Tests
             _materialServiceProviderService.Setup(x => x.GetAllServiceProviderAsync())
             .ReturnsAsync(serviceProviderDtoData);
 
-            var materialServiceProviderController = new MaterialServiceProviderController(_materialServiceProviderService.Object, configMock.Object);
+            var materialServiceProviderController = new MaterialServiceProviderController(_materialServiceProviderService.Object, _fileManagerService.Object);
 
             var serviceProviderResult = await materialServiceProviderController.GetAllMaterialServiceProvides();
 
@@ -59,7 +61,7 @@ namespace DAIS.API.Tests
             _materialServiceProviderService.Setup(x => x.AddServiceProviderAsync(serviceProviderDto[0]))
              .ReturnsAsync(serviceProviderDto[0]);
 
-            var materialServiceProviderController = new MaterialServiceProviderController(_materialServiceProviderService.Object, configMock.Object);
+            var materialServiceProviderController = new MaterialServiceProviderController(_materialServiceProviderService.Object, _fileManagerService.Object);
 
             var serviceProviderResult = "";// await materialServiceProviderController.AddServiceProviderAsync(serviceProviderDto[0]);
 
@@ -75,7 +77,7 @@ namespace DAIS.API.Tests
             _materialServiceProviderService.Setup(x => x.UpdateServiceProviderAsync(serviceProviderDto[0]))
              .ReturnsAsync(serviceProviderDto[0]);
 
-            var materialServiceProviderController = new MaterialServiceProviderController(_materialServiceProviderService.Object, configMock.Object);
+            var materialServiceProviderController = new MaterialServiceProviderController(_materialServiceProviderService.Object, _fileManagerService.Object);
 
             var serviceProviderResult = ""; //await materialServiceProviderController.UpdateServiceProviderAsync(serviceProviderDto[0]);
 
@@ -91,7 +93,7 @@ namespace DAIS.API.Tests
             _materialServiceProviderService.Setup(x => x.DeleteServiceProviderAsync(It.IsAny<Guid>()));
 
 
-            var materialServiceProviderController = new MaterialServiceProviderController(_materialServiceProviderService.Object, configMock.Object);
+            var materialServiceProviderController = new MaterialServiceProviderController(_materialServiceProviderService.Object, _fileManagerService.Object);
 
             await materialServiceProviderController.DeleteServiceProviderAsync(Guid.NewGuid());
 

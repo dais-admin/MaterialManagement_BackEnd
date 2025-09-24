@@ -131,7 +131,7 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var project = await _genericRepo.Query()
-                    .FirstOrDefaultAsync(x=>x.ProjectName==name).ConfigureAwait(false);
+                    .FirstOrDefaultAsync(x=>x.ProjectName.ToLower() == name.ToLower()).ConfigureAwait(false);
                 projectDto = _mapper.Map<ProjectDto>(project);
             }
             catch (Exception ex)

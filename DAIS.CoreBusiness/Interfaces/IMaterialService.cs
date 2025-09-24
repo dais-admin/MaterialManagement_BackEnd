@@ -18,5 +18,8 @@ namespace DAIS.CoreBusiness.Interfaces
         Task DeleteBulkUploadMaterials(Guid bulkUploadDetailId);
         Task<List<Guid>> GetAllMaterialIdsByBulkUploadIdAsync(Guid bulkUploadDetailId);
         Task<List<MaterialDto>> GetMaterialsAddedByCurrentUser();
+        Task<List<MaterialDto>> GetAllMaterialsByLocationAsync(Guid locationId);
+        Task<List<MaterialDto>> GetAllMaterialsByDivisionAsync(Guid divisionId);
+        Task<List<MaterialDto>> GetAllMaterialsBySubDivisionAsync(Guid SubdivisionId);
     }
 }

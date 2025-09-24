@@ -4,8 +4,13 @@ namespace DAIS.CoreBusiness.Dtos.Reports
 {
     public class ProjectDto
     {
+        private string projectName;
         public Guid Id { get; set; }
-        public string ProjectName { get; set; }
+        public string ProjectName
+        {
+            get => projectName;
+            set => projectName = value?.ToUpper();
+        }
         public string ProjectCode { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }

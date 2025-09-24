@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace DAIS.DataAccess.Entities
 {
     public class MaterialSoftware:BaseEntity
@@ -10,8 +12,12 @@ namespace DAIS.DataAccess.Entities
         public DateTime? EndDate { get; set; }
         public string? SoftwareDocument {  get; set; }
         public string? Remarks { get; set; }
+
+        [ForeignKey("SupplierId")]
         public Guid SupplierId { get; set; }
         public virtual Supplier Supplier { get; set; }
+
+        [ForeignKey("MaterialId")]
         public Guid MaterialId { get; set; }
         public virtual Material? Material { get; set; }
         

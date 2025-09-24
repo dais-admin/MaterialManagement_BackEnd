@@ -13,6 +13,9 @@ namespace DAIS.CoreBusiness.Dtos
         public Guid Id { get; set; }
         public DateTime WarrantyStartDate { get; set; }
         public DateTime WarrantyEndDate { get; set; }
+
+        public DateTime? DLPStartDate { get; set; }
+        public DateTime? DLPEndDate { get; set; }
         public DateTime? LastRenewalDate { get; set; }
         public bool? IsExtended { get; set; }
         public int? NoOfMonths { get; set; }

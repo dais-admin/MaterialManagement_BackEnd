@@ -135,7 +135,7 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var region = _genericRepo.Query()
-                    .FirstOrDefault(x=>x.RegionName==name);
+                    .FirstOrDefault(x=>x.RegionName.ToLower() == name.ToLower());
                 regionDto = _mapper.Map<RegionDto>(region);
 
             }

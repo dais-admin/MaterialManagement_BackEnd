@@ -19,7 +19,7 @@ namespace DAIS.CoreBusiness.Seeding
                 };
                 await userManager.CreateAsync(user, "Admin@12345");
 
-                await userManager.AddToRoleAsync(user, "SuperAdmin").ConfigureAwait(false);
+                await userManager.AddToRoleAsync(user, "Admin").ConfigureAwait(false);
             }
         }
     }

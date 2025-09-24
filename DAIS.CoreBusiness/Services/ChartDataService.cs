@@ -34,8 +34,7 @@ namespace DAIS.CoreBusiness.Services
                     .Include(x => x.Region)
                     .Include(x => x.Manufacturer)
                     .Include(x => x.Location)
-                    .Include(x => x.Supplier)
-                    .Include(x => x.SubDivision)
+                    .Include(x => x.Supplier)                   
                     .Include(x => x.WorkPackage)
                     .ToListAsync().ConfigureAwait(false);
 

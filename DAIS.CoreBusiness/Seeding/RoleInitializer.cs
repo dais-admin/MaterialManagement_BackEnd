@@ -9,7 +9,11 @@ namespace DAIS.CoreBusiness.Seeding
         {
             try
             {
-                var roles = new[] { "SuperAdmin", "Admin", "Submitter", "Reviewer", "Approver", "Viewer", "Supervisor" };
+                var roles = new[] { "Admin","ExecutiveEngineer",
+                    "Approver","Submitter", "Reviewer",
+                    "MaterialIssuer","MaterialReciever",
+                     "Viewer",
+                };
                 IdentityResult roleResult;
 
                 foreach (var roleName in roles)

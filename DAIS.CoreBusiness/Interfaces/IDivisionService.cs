@@ -10,6 +10,6 @@ namespace DAIS.CoreBusiness.Interfaces
         Task DeleteDivision(Guid id);
         Task<List<DivisionDto>> GetAllDivision();
         Task<List<DivisionDto>> GetDivisionsByLocation(Guid locationId);
-        DivisionDto GetDivisionIdByName(string name, Guid locationId);
+        DivisionDto GetDivisionIdByName(string name);
     }
 }

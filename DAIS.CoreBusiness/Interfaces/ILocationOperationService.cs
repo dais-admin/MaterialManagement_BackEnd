@@ -12,6 +12,6 @@ namespace DAIS.CoreBusiness.Interfaces
         Task<List<LocationOperationDto>> GetAllLocationOperation();
         Task<List<LocationOperationDto>> GetLocationsByWorkPackageId(Guid workPackageId);
         LocationOperationDto GetLocationIdByName(string name, string system);
-
+        Task<List<LocationOperationDto>> GetLocationsBySubDivisionId(Guid subDivisionId);
     }
 }

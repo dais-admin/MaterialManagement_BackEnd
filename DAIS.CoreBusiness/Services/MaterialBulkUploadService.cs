@@ -5,14 +5,13 @@ using DAIS.CoreBusiness.Dtos;
 using DAIS.CoreBusiness.Interfaces;
 using DAIS.DataAccess.Entities;
 using DAIS.DataAccess.Interfaces;
-using DAIS.DataAccess.Repositories;
-using DocumentFormat.OpenXml.InkML;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Spire.Xls;
 using System;
 using System.Security.Claims;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace DAIS.CoreBusiness.Services
 {
@@ -64,8 +63,8 @@ namespace DAIS.CoreBusiness.Services
                     var worksheet = workbook.AddWorksheet("Sheet1");
 
                     string[] columnNames = {"Project", "WorkPackage",
-                 "System(Water Scada/Sewerage Scada)", "Location of Operation",
-                 "Division","SubDivision","Region","Material Type","Material Category",
+                 "System(Water Scada/Sewerage Scada)", 
+                 "Division","SubDivision","Location of Operation","Region","Material Type","Material Category",
                  "Supplier","Manufacturer","Contractor","MaterialName","MaterialQty",
                  "Measurement","MadelNumber","TagNumber",
                  "Purchase Date","Commissioning Date","Date of Supply",
@@ -92,6 +91,7 @@ namespace DAIS.CoreBusiness.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
+                throw ex;
             }
             return isSuccess;
         }
@@ -103,12 +103,14 @@ namespace DAIS.CoreBusiness.Services
             {
                 var projectList = await _materialServiceDependencies.ProjectService.GetAllProjects();
                 var workPackageList = await _materialServiceDependencies.WorkPackageService.GetAllWorkPackages();
+                var divisionList = await _materialServiceDependencies.DivisionService.GetAllDivision();
+                var subDivisionList = await _materialServiceDependencies.SubDivisionService.GetAllSubDivision();
                 var locationList = await _materialServiceDependencies
                     .LocationOperationService.GetAllLocationOperation();
                    
                 var regionList = await _materialServiceDependencies.RegionService.GetAllRegions();
-                var divisionList = await _materialServiceDependencies.DivisionService.GetAllDivision();
-                var subDivisionList = await _materialServiceDependencies.SubDivisionService.GetAllSubDivision();
+                
+                
                 var materilTypeList = await _materialServiceDependencies.MaterialTypeService.GetAllMaterialTypes();
                 var categoryList = await _materialServiceDependencies.CategoryService.GetAllCategory();
                 var supplierList = await _materialServiceDependencies.SupplierService.GetAllSupplier();
@@ -130,14 +132,16 @@ namespace DAIS.CoreBusiness.Services
 
                 AddValidationList(validationSheet, "Systems", ref currentRow, new List<string> { "Water", "Sewerage" });
                 
-                AddValidationList(validationSheet, "Locations", ref currentRow, 
-                    locationList.Select(x => x.LocationOperationName).Distinct().ToList());
-
+                
                 AddValidationList(validationSheet, "Divisions", ref currentRow, 
                     divisionList.Select(x => x.DivisionName).Distinct().ToList());
 
                 AddValidationList(validationSheet, "SubDivisions", ref currentRow,
                     subDivisionList.Select(x => x.SubDivisionName).Distinct().ToList());
+
+                AddValidationList(validationSheet, "Locations", ref currentRow,
+                    locationList.Select(x => x.LocationOperationName).Distinct().ToList());
+
 
                 AddValidationList(validationSheet, "Regions", ref currentRow, 
                     regionList.Select(x => x.RegionName).Distinct().ToList());
@@ -171,17 +175,20 @@ namespace DAIS.CoreBusiness.Services
                     range = worksheet.Range(row, 2, row, 2);
                     range.SetDataValidation().List(worksheet.Workbook.NamedRanges.NamedRange("WorkPackages").Ranges.First());
 
+                    
+
                     range = worksheet.Range(row, 3, row, 3);
                     range.SetDataValidation().List(worksheet.Workbook.NamedRanges.NamedRange("Systems").Ranges.First());
 
                     range = worksheet.Range(row, 4, row, 4);
-                    range.SetDataValidation().List(worksheet.Workbook.NamedRanges.NamedRange("Locations").Ranges.First());
-
-                    range = worksheet.Range(row, 5, row, 5);
                     range.SetDataValidation().List(worksheet.Workbook.NamedRanges.NamedRange("Divisions").Ranges.First());
 
-                    range = worksheet.Range(row, 6, row, 6);
+
+                    range = worksheet.Range(row, 5, row, 5);
                     range.SetDataValidation().List(worksheet.Workbook.NamedRanges.NamedRange("SubDivisions").Ranges.First());
+
+                    range = worksheet.Range(row, 6, row, 6);
+                    range.SetDataValidation().List(worksheet.Workbook.NamedRanges.NamedRange("Locations").Ranges.First());
 
                     range = worksheet.Range(row, 7, row, 7);
                     range.SetDataValidation().List(worksheet.Workbook.NamedRanges.NamedRange("Regions").Ranges.First());
@@ -213,6 +220,7 @@ namespace DAIS.CoreBusiness.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
+
             }
             return isSuccess;
         }
@@ -310,34 +318,11 @@ namespace DAIS.CoreBusiness.Services
                             materialDto.System = system;
                         }
 
-                        //Location of Operation
-                        var locationName = worksheet.Range[row, 4].Value.Trim();
-                        validation = CheckFieldValidation("Location", locationName, "D" + row);
-                        if (!validation.IsValidationSucess)
-                        {
-                            validationList.Add(validation);
-                        }
-                        else
-                        {
-                            var locationOperation = _materialServiceDependencies.LocationOperationService.GetLocationIdByName(locationName,system);
-                            if (locationOperation != null)
-                            {
-                                materialDto.LocationId = (Guid)locationOperation.Id;
-                            }
-                            else
-                            {
-                                validation = new BulkUploadValidationDto();
-                                validation.ValidationMessage = "Location is not exists in database";
-                                validation.FieldValue = locationName;
-                                validation.FieldName = "Location";
-                                validation.FieldAddress = "D" + row;
-                                validationList.Add(validation);
-                            }
-                        }
+                        
                         //Division
-                        var divisionName = worksheet.Range[row, 5].Value.Trim();
+                        var divisionName = worksheet.Range[row, 4].Value.Trim();
                         Guid divisionId= Guid.Empty;
-                        validation = CheckFieldValidation("Division", divisionName, "E" + row);
+                        validation = CheckFieldValidation("Division", divisionName, "D" + row);
                         if (!validation.IsValidationSucess)
                         {
                             validationList.Add(validation);
@@ -345,10 +330,11 @@ namespace DAIS.CoreBusiness.Services
                         else
                         {
                             var division = _materialServiceDependencies.DivisionService
-                                .GetDivisionIdByName(divisionName,(Guid)materialDto.LocationId);
+                                .GetDivisionIdByName(divisionName);
                             if (division != null)
                             {
-                                divisionId=division.Id;
+                                materialDto.DivisionId =division.Id;
+                                materialDto.Division = division;
                             }
                             else
                             {
@@ -356,15 +342,15 @@ namespace DAIS.CoreBusiness.Services
                                 validation.ValidationMessage = "Division is not exists in database";
                                 validation.FieldValue = divisionName;
                                 validation.FieldName = "Division";
-                                validation.FieldAddress = "E" + row;
+                                validation.FieldAddress = "D" + row;
                                 validationList.Add(validation);
                             }
                         }
                         
 
                         //SubDivision
-                        var subDivisionName = worksheet.Range[row, 6].Value.Trim();
-                        validation = CheckFieldValidation("SubDivision", subDivisionName, "F" + row);
+                        var subDivisionName = worksheet.Range[row, 5].Value.Trim();
+                        validation = CheckFieldValidation("SubDivision", subDivisionName, "E" + row);
                         if (!validation.IsValidationSucess)
                         {
                             validationList.Add(validation);
@@ -372,10 +358,11 @@ namespace DAIS.CoreBusiness.Services
                         else
                         {
                             var subDivision = _materialServiceDependencies.SubDivisionService
-                                .GetSubDivisionIdByName(subDivisionName,divisionId);
+                                .GetSubDivisionIdByName(subDivisionName);
                             if (subDivision != null)
                             {
                                 materialDto.SubDivisionId = subDivision.Id;
+                                materialDto.SubDivision = subDivision;
                             }
                             else
                             {
@@ -383,6 +370,32 @@ namespace DAIS.CoreBusiness.Services
                                 validation.ValidationMessage = "SubDivision is not exists in database";
                                 validation.FieldValue = divisionName;
                                 validation.FieldName = "SubDivision";
+                                validation.FieldAddress = "E" + row;
+                                validationList.Add(validation);
+                            }
+                        }
+
+                        //Location of Operation
+                        var locationName = worksheet.Range[row, 6].Value.Trim();
+                        validation = CheckFieldValidation("Location", locationName, "F" + row);
+                        if (!validation.IsValidationSucess)
+                        {
+                            validationList.Add(validation);
+                        }
+                        else
+                        {
+                            var locationOperation = _materialServiceDependencies.LocationOperationService.GetLocationIdByName(locationName, system);
+                            if (locationOperation != null)
+                            {
+                                materialDto.LocationId = (Guid)locationOperation.Id;
+                                materialDto.Location = locationOperation;
+                            }
+                            else
+                            {
+                                validation = new BulkUploadValidationDto();
+                                validation.ValidationMessage = "Location is not exists in database";
+                                validation.FieldValue = locationName;
+                                validation.FieldName = "Location";
                                 validation.FieldAddress = "F" + row;
                                 validationList.Add(validation);
                             }
@@ -448,6 +461,7 @@ namespace DAIS.CoreBusiness.Services
                             if (category != null)
                             {
                                 materialDto.CategoryId = (Guid)category.Id;
+                                materialDto.Category=category;
                             }
                             else
                             {
@@ -698,13 +712,13 @@ namespace DAIS.CoreBusiness.Services
                         {
                             if (isRehabilitation)
                             {
-                                materialDto.RehabilitationMaterialCode = "R-" + GenerateMaterialCode();
+                                materialDto.RehabilitationMaterialCode = "R-" + GenerateMaterialCode(materialDto);
                                 materialDto.IsRehabilitation = true;
                                 worksheet.Range["Z1"].Value = "Material Rehabilitation Code";
                             }
                             else
                             {
-                                materialDto.MaterialCode = GenerateMaterialCode();
+                                materialDto.MaterialCode = GenerateMaterialCode(materialDto);
                                 materialDto.IsRehabilitation = false;
                                 worksheet.Range["Z1"].Value = "Material Code";
                             }
@@ -759,26 +773,36 @@ namespace DAIS.CoreBusiness.Services
                 bulkUploadResponse.ResponseMessage=ex.Message;
                 bulkUploadResponse.IsSuccess=false;
                 bulkUploadResponse.Validations = new List<BulkUploadValidationDto>();
+                _logger.LogError(ex.Message, ex);
+                throw ex;
             }
             return bulkUploadResponse;
         }
 
         private async void GenerateAndSaveBulkUpladFile(BulkUploadResponseDto bulkUploadResponse, Workbook workbook, List<MaterialDto> materialListDto)
         {
-            bulkUploadResponse.ResponseMessage = "Records Uploaded Successfully,Please download the file to confirm.";
-            bulkUploadResponse.IsSuccess = true;
-            bulkUploadResponse.Materials = materialListDto;
-            bulkUploadResponse.Validations = new List<BulkUploadValidationDto>();
+            try
+            {
+                bulkUploadResponse.ResponseMessage = "Records Uploaded Successfully,Please download the file to confirm.";
+                bulkUploadResponse.IsSuccess = true;
+                bulkUploadResponse.Materials = materialListDto;
+                bulkUploadResponse.Validations = new List<BulkUploadValidationDto>();
 
-            newFileName = Guid.NewGuid().ToString() + "_" + DateTime.Today.Year.ToString() + DateTime.Today.Month.ToString()
-                   + DateTime.Now.Day.ToString() + DateTime.Now.Minute.ToString() + ".xlsx";
+                newFileName = Guid.NewGuid().ToString() + "_" + DateTime.Today.Year.ToString() + DateTime.Today.Month.ToString()
+                       + DateTime.Now.Day.ToString() + DateTime.Now.Minute.ToString() + ".xlsx";
 
-            // Save to an Excel file
-            string uploadedFilePath = folderPath + newFileName;
-            workbook.SaveToFile(uploadedFilePath, ExcelVersion.Version2016);
-            bulkUploadResponse.UploadedFile = newFileName;
-            // Dispose resources
-            workbook.Dispose();
+                // Save to an Excel file
+                string uploadedFilePath = folderPath + newFileName;
+                workbook.SaveToFile(uploadedFilePath, ExcelVersion.Version2016);
+                bulkUploadResponse.UploadedFile = newFileName;
+                // Dispose resources
+                workbook.Dispose();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                throw ex;
+            }
             
         }
 
@@ -842,6 +866,7 @@ namespace DAIS.CoreBusiness.Services
                 }
                 
                 
+                
 
             }
             catch(Exception ex)
@@ -896,17 +921,71 @@ namespace DAIS.CoreBusiness.Services
             };
             return _bulkUploadDetailService.AddBulkUploadDetail(bulkUploadDetailDto);           
         }
-        private string GenerateMaterialCode()
+        
+        public string GenerateMaterialCode(MaterialDto materialDto)
         {
-            // Generate a timestamp using DateTime.Now.Ticks and convert it to base 36
-            string timestamp = Convert.ToString(DateTime.Now.Ticks, 36);
+            // Get current date and time
+            DateTime now = DateTime.Now;
+            string minutes = now.Minute.ToString("D2");
+            string hours = now.Hour.ToString("D2");
 
-            // Generate a random string of 4 characters in base 36
-            Random random = new Random();
-            string randomString = Convert.ToString(random.Next(0, 46656), 36).PadLeft(4, '0'); // Random number between 0 and 46655, padded to 4 characters
+            // Get system (first 2 characters)
+            string systemPrefix = string.IsNullOrEmpty(materialDto.System) ? "WA" : materialDto.System.Substring(0, 2).ToUpper();
 
-            // Combine the timestamp and random part and return the result in uppercase
-            return $"MC-{timestamp}{randomString}".ToUpper();
+            // Get location (division, subdivision, or location)
+            string locationPart = GetLocationPart(materialDto);
+
+            // Get category (3 letters)
+            string categoryPart = "CAT";
+            if (!string.IsNullOrEmpty(materialDto.Category.CategoryName))
+            {
+                categoryPart = GetFirstThreeLetters(materialDto.Category.CategoryName);
+            }
+
+            // Combine all parts
+            return $"{systemPrefix}-{locationPart}-{categoryPart}-{hours}{minutes}".ToUpper();
+        }
+
+        private string GetLocationPart(MaterialDto materialDto)
+        {
+            string locationPart = string.Empty;
+
+            // Use division
+            if (materialDto.Division!=null)
+            {
+                locationPart = GetFirstThreeLetters(materialDto.Division.DivisionName);
+            }
+            // Use subdivision
+            else if (materialDto.SubDivision!=null)
+            {
+                locationPart = GetFirstThreeLetters(materialDto.SubDivision.SubDivisionName);
+            }
+            // Use location
+            else if (materialDto.Location != null)
+            {
+                locationPart = GetFirstThreeLetters(materialDto.Location.LocationOperationName);
+            }
+
+            // If no location part was set, use a default
+            if (string.IsNullOrEmpty(locationPart))
+            {
+                locationPart = "LOC";
+            }
+
+            return locationPart;
+        }
+
+        // Helper method to get first three letters from a string
+        private string GetFirstThreeLetters(string str)
+        {
+            // Return "XXX" if str is null or empty
+            if (string.IsNullOrEmpty(str)) return "XXX";
+
+            // Remove spaces and special characters
+            string cleanStr = new string(str.Where(char.IsLetterOrDigit).ToArray());
+
+            // Get first three letters, pad with 'X' if needed
+            return (cleanStr.Substring(0, Math.Min(3, cleanStr.Length)) + "XXX").Substring(0, 3);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace DAIS.CoreBusiness.Dtos
     {
         public Guid Id { get; set; }
         public string System { get; set; }
-        public string TagNumber { get; set; }
+        public string? TagNumber { get; set; }
         public string MaterialName { get; set; }
         public string MaterialCode { get; set; }
         public int MaterialQty { get; set; }
@@ -34,13 +34,14 @@ namespace DAIS.CoreBusiness.Dtos
 
         public Guid? RegionId { get; set; }
         public RegionDto? Region { get; set; }
-
+        public Guid? DivisionId { get; set; }
+        public DivisionDto? Division { get; set; }
+        public Guid? SubDivisionId { get; set; }
+        public SubDivisionDto? SubDivision { get; set; }
         public Guid? LocationId { get; set; }      
         public LocationOperationDto? Location { get; set; }
 
-        public Guid? SubDivisionId { get; set; }
-        public SubDivisionDto? SubDivision { get; set; } 
-        public DivisionDto? Division { get; set; }
+        
 
         public Guid? ManufacturerId { get; set; }
         public ManufacturerDto? Manufacturer { get; set; }

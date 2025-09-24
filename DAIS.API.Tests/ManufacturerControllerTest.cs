@@ -13,19 +13,22 @@ namespace DAIS.API.Tests
     public class ManufacturerControllerTest
     {
         private readonly Mock<IManufacturerService> _manufacturerService;
+        private readonly Mock<IFileManagerService> _fileManagerService;
         private readonly List<ManufacturerDto> _manufacturerDtoData;
         private readonly ManufacturerController _manufacturerController;
+
         private readonly Mock<IOptions<MaterialConfigSettings>> configMock;
         public ManufacturerControllerTest()
         {
             _manufacturerService = new Mock<IManufacturerService>();
+             _fileManagerService = new Mock<IFileManagerService>();
             var _configData = new MaterialConfigSettings { DocumentBasePath = "TestConnectionString" };
             configMock = new Mock<IOptions<MaterialConfigSettings>>();
             configMock.Setup(x => x.Value).Returns(_configData);
             _manufacturerDtoData = ApiTestData.GetManufacturerDtoData();
             _manufacturerService.Setup(x => x.GetManufacturer(It.IsAny<Guid>()))
            .ReturnsAsync(_manufacturerDtoData[0]);
-            _manufacturerController = new ManufacturerController(_manufacturerService.Object, configMock.Object);
+            _manufacturerController = new ManufacturerController(_manufacturerService.Object, _fileManagerService.Object);
 
 
         }
@@ -59,7 +62,7 @@ namespace DAIS.API.Tests
             _manufacturerService.Setup(x => x.AddManufacturer(manufacturerDto[0]))
             .ReturnsAsync(manufacturerDto[0]);
 
-            var manufacturerController = new ManufacturerController(_manufacturerService.Object, configMock.Object);
+            var manufacturerController = new ManufacturerController(_manufacturerService.Object, _fileManagerService.Object);
 
             var manufacturerResult = ""; //await manufacturerController.AddManufacturer(manufacturerDto[0]);
 
@@ -75,7 +78,7 @@ namespace DAIS.API.Tests
             _manufacturerService.Setup(x => x.UpdateManufactuter(manufacturerDto[0]))
              .ReturnsAsync(manufacturerDto[0]);
 
-            var manufacturerController = new ManufacturerController(_manufacturerService.Object, configMock.Object);
+            var manufacturerController = new ManufacturerController(_manufacturerService.Object, _fileManagerService.Object);
 
             var manufacturerResult = ""; //await manufacturerController.UpdateManufacturer(manufacturerDto[0]);
 
@@ -91,7 +94,7 @@ namespace DAIS.API.Tests
             _manufacturerService.Setup(x => x.DeleteManufacturer(It.IsAny<Guid>()));
 
 
-            var manufacturerController = new ManufacturerController(_manufacturerService.Object, configMock.Object);
+            var manufacturerController = new ManufacturerController(_manufacturerService.Object, _fileManagerService.Object);
 
             await manufacturerController.DeleteManufacturer(Guid.NewGuid());
 

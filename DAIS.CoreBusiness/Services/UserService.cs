@@ -18,16 +18,22 @@ namespace DAIS.CoreBusiness.Services
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly IGenericRepository<User> _genericRepository;
+        private readonly ILocationOperationService _locationOperationService;
+        private readonly IDivisionService _devisionService;
+        private readonly ISubDivisionService _subDivisionService;
         public UserService(IGenericRepository<User> genericRepository,IMapper mapper,
             ILogger<UserService> logger,
             UserManager<User> userManager,
-            RoleManager<Role> roleManager)
+            RoleManager<Role> roleManager, ILocationOperationService locationOperationService, IDivisionService decisionService, ISubDivisionService subDivisionService)
         {
             _genericRepository = genericRepository;
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
             _logger = logger;
+            _locationOperationService = locationOperationService;
+            _devisionService = decisionService;
+            _subDivisionService = subDivisionService;
         }
 
         public async Task<UserDto> UpdateUser(RegistrationDto registrationDto)
@@ -42,7 +48,7 @@ namespace DAIS.CoreBusiness.Services
                     user.LocationId = registrationDto.LocationId;
                     user.RegionId = registrationDto.RegionId;
                     user.SubDivisionId = registrationDto.SubDivisionId;
-                    //ProjectId = registrationDto.ProjectId,
+                    user.DivisionId = registrationDto.DivisionId;
                     user.UserPhoto = registrationDto.UserPhoto;
                     //UserType = UserTypes.Viewer, //(UserTypes)Enum.Parse(typeof(UserTypes), registrationDto.UserType, true),
                     user.Email = registrationDto.Email;
@@ -105,15 +111,24 @@ namespace DAIS.CoreBusiness.Services
                 var users=await _userManager.GetUsersInRoleAsync(roleName);
                 foreach (var user in users)
                 {
-                    userListDto.Add(
-                        new UserDto()
-                        {
-                            Id=Guid.Parse(user.Id),
-                            EmployeeName=user.EmployeeName,
-                            UserName=user.UserName,
-                            Email=user.Email,                       
-                        }
-                   );
+                    var userDto = new UserDto();
+                    userDto.Id = Guid.Parse(user.Id);
+                    userDto.EmployeeName = user.EmployeeName;
+                    userDto.UserName = user.UserName;
+                    userDto.Email = user.Email;
+                    if (user.DivisionId != null)
+                    {
+                        userDto.DivisionId = user.DivisionId;
+                    }
+                    if(user.SubDivisionId!= null)
+                    {
+                        userDto.SubDivisionId = user.SubDivisionId;
+                    }
+                    if (user.LocationId != null)
+                    {
+                        userDto.LocationId = user.LocationId;
+                    }
+                    userListDto.Add(userDto);
                 }
             }
             catch (Exception ex)
@@ -155,6 +170,7 @@ namespace DAIS.CoreBusiness.Services
                 if (user != null)
                 {
                     userDto = _mapper.Map<UserDto>(user);
+                    
                 }
 
             }
@@ -168,7 +184,7 @@ namespace DAIS.CoreBusiness.Services
         }
         public async Task<UserDto> GetUserById(Guid userId)
         {
-            var user = await _genericRepository.GetById(userId).ConfigureAwait(false);
+            var user = await _genericRepository.Query().FirstOrDefaultAsync(u=>u.Id==userId.ToString());
             if (user is null)
             {
                 _logger.LogError($"User does not exist with User Id:{userId}");
@@ -231,18 +247,25 @@ namespace DAIS.CoreBusiness.Services
             List<UserDto> userDtoList = new List<UserDto>();
             try
             {
-                var users = await _genericRepository.Query()
-                    .Include(x => x.Location)
+                var users = await _genericRepository.Query()                   
                     .Include(x => x.Region)
-                    .Include(x=>x.SubDivision)
                     .Include(x=>x.Project)
                     .ToListAsync().ConfigureAwait(false);
                 foreach (var user in users)
                 {
                     var userDto = _mapper.Map<UserDto>(user);
-                    userDto.Location = _mapper.Map<LocationOperationDto>(user.Location);
+                    if(user.LocationId!= null)
+                    {
+                        userDto.Location =await _locationOperationService.GetLocationOperation((Guid)user.LocationId);
+                    }
+                   if(user.SubDivisionId!= null)
+                    {
+                        userDto.SubDivision = await _subDivisionService.GetSubDivision((Guid)user.SubDivisionId);
+                       
+                    }
+                   
                     userDto.Region = _mapper.Map<RegionDto>(user.Region);
-                    userDto.SubDivision = _mapper.Map<SubDivisionDto>(user.SubDivision);
+                    
                     if(user.Project != null)
                     {
                         userDto.Project = _mapper.Map<ProjectDto>(user.Project);
@@ -261,9 +284,7 @@ namespace DAIS.CoreBusiness.Services
         private async Task<User> GetUserByEmail(string userEmail)
         {
             var user = await _genericRepository.Query()
-                .Include(x => x.Location)
                 .Include(x => x.Region)
-                .Include(x => x.SubDivision)
                 .Include(x => x.Project)
                 .FirstOrDefaultAsync(x => x.Email.Trim() == userEmail.Trim())
                 .ConfigureAwait(false);

@@ -9,6 +9,7 @@ namespace DAIS.DataAccess.Helpers
         InUse,
         UnderMaintanance,
         Defective,
+        DisposedAuction,
         //Return,
         Expired,
         [Display(Name = "Required License")]

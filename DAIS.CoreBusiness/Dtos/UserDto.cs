@@ -11,11 +11,13 @@ namespace DAIS.CoreBusiness.Dtos
         public string EmployeeName { get; set; }
         public string UserType { get; set; }
         public string Email { get; set; }
+        public Guid? LocationId { get; set; }
         public LocationOperationDto Location {  get; set; }
-        public RegionDto Region { get; set; }
-        
+        public RegionDto Region { get; set; }       
         public ProjectDto Project { get; set; }
+        public Guid? SubDivisionId { get; set; }     
         public  SubDivisionDto SubDivision { get; set; }
+        public Guid? DivisionId { get; set; }
         public string UserToken { get; set; }
         public bool IsSuccess { get; set; }
         public string Message { get; set; }

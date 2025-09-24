@@ -39,6 +39,21 @@ namespace DAIS.API.Controllers
         {
             return Ok(await _materialService.GetAllMaterialsAsync(workPackageId));
         }
+        [HttpGet("GetAllMaterialsByLocation")]
+        public async Task<IActionResult> GetAllMaterialsByLocation(Guid locationId)
+        {
+            return Ok(await _materialService.GetAllMaterialsByLocationAsync(locationId));
+        }
+        [HttpGet("GetAllMaterialsByDivision")]
+        public async Task<IActionResult> GetAllMaterialsByDivision(Guid divisionId)
+        {
+            return Ok(await _materialService.GetAllMaterialsByDivisionAsync(divisionId));
+        }
+        [HttpGet("GetAllMaterialsBySubDivision")]
+        public async Task<IActionResult> GetAllMaterialsBySubDivision(Guid subdivisionId)
+        {
+            return Ok(await _materialService.GetAllMaterialsBySubDivisionAsync(subdivisionId));
+        }
         [HttpGet("GetAllMaterialsBySystem")]
         public async Task<IActionResult> GetAllMaterialsBySystem(string systemName,bool isRehabilitation)
         {

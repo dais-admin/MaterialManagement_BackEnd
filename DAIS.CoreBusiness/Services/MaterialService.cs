@@ -133,7 +133,7 @@ namespace DAIS.CoreBusiness.Services
                 materialMasterListDto.RegionList = await _materialServiceDependencies.RegionService.GetAllRegions().ConfigureAwait(false);
                 materialMasterListDto.ManufacturerList = await _materialServiceDependencies.ManufacturerService.GetAllManufacturer().ConfigureAwait(false);
                 materialMasterListDto.SuppliersList = await _materialServiceDependencies.SupplierService.GetAllSupplier().ConfigureAwait(false);
-                //materialMasterListDto.DivisionList = await _materialServiceDependencies.DivisionService.GetAllDivision().ConfigureAwait(false);
+                materialMasterListDto.DivisionList = await _materialServiceDependencies.DivisionService.GetAllDivision().ConfigureAwait(false);
                 materialMasterListDto.LocationOperationList = await _materialServiceDependencies.LocationOperationService.GetAllLocationOperation().ConfigureAwait(false);
                 materialMasterListDto.ProjectsList = await _materialServiceDependencies.ProjectService.GetAllProjects().ConfigureAwait(false);
                 materialMasterListDto.MaterialMeasuremetList = await _materialServiceDependencies.MaterialMeasurementService.GetAllMaterialMeasurement().ConfigureAwait(false);
@@ -171,8 +171,9 @@ namespace DAIS.CoreBusiness.Services
                     .Include(x => x.Region)
                     .Include(x => x.Manufacturer)
                     .Include(x => x.Location)
-                    .Include(x => x.Supplier)
-                    .Include(x => x.SubDivision)  
+                    .ThenInclude(x=>x.SubDivision)
+                    .ThenInclude(x=>x.Division)
+                    .Include(x => x.Supplier)  
                     .Include(x=>x.WorkPackage)
                     .Include(x=>x.Measurement)
                     .Include(x=>x.Contractor)
@@ -201,6 +202,120 @@ namespace DAIS.CoreBusiness.Services
 
             return materialDtoList;
         }
+        public async Task<List<MaterialDto>> GetAllMaterialsByLocationAsync(Guid locationId)
+        {
+            _materialServiceInfrastructure.Logger.LogInformation("MaterialService:GetAllMaterialsAsync:Method Start");
+            List<MaterialDto> materialDtoList = new List<MaterialDto>();
+            try
+            {
+                var materialList = await _materialServiceInfrastructure.GenericRepository.Query()
+                    .Where(x => x.LocationId == locationId)
+                    .Include(x => x.MaterialType)
+                    .Include(x => x.Category)
+                    .Include(x => x.Region)
+                    .Include(x => x.Manufacturer)
+                    .Include(x => x.Location)
+                    .Include(x => x.Supplier)
+                    .Include(x => x.WorkPackage)
+                    .Include(x => x.Measurement)
+                    .Include(x => x.Contractor)
+                    .ToListAsync().ConfigureAwait(false);
+             
+
+                materialList.ForEach(material =>
+                {
+                    var materialDto = _materialServiceInfrastructure.Mapper.Map<MaterialDto>(material);
+                    materialDto.MaterialStatus = Enum.GetName(typeof(MaterialStatus), material.MaterialStatus);
+
+                    materialDtoList.Add(materialDto);
+                });
+
+            }
+            catch (Exception ex)
+            {
+                _materialServiceInfrastructure.Logger.LogError(message: ex.Message, ex);
+                throw ex;
+            }
+            _materialServiceInfrastructure.Logger.LogInformation("MaterialService:GetAllMaterialsAsync:Method End");
+
+            return materialDtoList;
+        }
+        public async Task<List<MaterialDto>> GetAllMaterialsByDivisionAsync(Guid divisionId)
+        {
+            _materialServiceInfrastructure.Logger.LogInformation("MaterialService:GetAllMaterialsByDivisionAsync:Method Start");
+            List<MaterialDto> materialDtoList = new List<MaterialDto>();
+            try
+            {
+                var materialList = await _materialServiceInfrastructure.GenericRepository.Query()
+                    .Where(x => x.DivisionId == divisionId)
+                    .Include(x => x.MaterialType)
+                    .Include(x => x.Category)
+                    .Include(x => x.Region)
+                    .Include(x => x.Manufacturer)
+                    .Include(x => x.Measurement)
+                    .Include(x => x.Location)
+                    .Include(x => x.Supplier)
+                    .Include(x => x.WorkPackage)
+                    
+                    .ToListAsync().ConfigureAwait(false);
+
+
+                materialList.ForEach(material =>
+                {
+                    var materialDto = _materialServiceInfrastructure.Mapper.Map<MaterialDto>(material);
+                    materialDto.MaterialStatus = Enum.GetName(typeof(MaterialStatus), material.MaterialStatus);
+
+                    materialDtoList.Add(materialDto);
+                });
+
+            }
+            catch (Exception ex)
+            {
+                _materialServiceInfrastructure.Logger.LogError(message: ex.Message, ex);
+                throw ex;
+            }
+            _materialServiceInfrastructure.Logger.LogInformation("MaterialService:GetAllMaterialsByDivisionAsync:Method End");
+
+            return materialDtoList;
+        }
+        public async Task<List<MaterialDto>> GetAllMaterialsBySubDivisionAsync(Guid SubDivisionId)
+        {
+            _materialServiceInfrastructure.Logger.LogInformation("MaterialService:GetAllMaterialsBySubDivisionAsync:Method Start");
+            List<MaterialDto> materialDtoList = new List<MaterialDto>();
+            try
+            {
+                var materialList = await _materialServiceInfrastructure.GenericRepository.Query()
+                    .Where(x => x.SubDivisionId == SubDivisionId)
+                    .Include(x => x.MaterialType)
+                    .Include(x => x.Category)
+                    .Include(x => x.Region)
+                    .Include(x => x.Manufacturer)
+                    .Include(x => x.Measurement)
+                    .Include(x => x.Location)
+                    .Include(x => x.Supplier)
+                    .Include(x => x.WorkPackage)
+
+                    .ToListAsync().ConfigureAwait(false);
+
+
+                materialList.ForEach(material =>
+                {
+                    var materialDto = _materialServiceInfrastructure.Mapper.Map<MaterialDto>(material);
+                    materialDto.MaterialStatus = Enum.GetName(typeof(MaterialStatus), material.MaterialStatus);
+
+                    materialDtoList.Add(materialDto);
+                });
+
+            }
+            catch (Exception ex)
+            {
+                _materialServiceInfrastructure.Logger.LogError(message: ex.Message, ex);
+                throw ex;
+            }
+            _materialServiceInfrastructure.Logger.LogInformation("MaterialService:GetAllMaterialsBySubDivisionAsync:Method End");
+
+            return materialDtoList;
+        }
 
         public async Task<MaterialDto> GetMaterialByIdAsync(Guid id)
         {
@@ -215,13 +330,17 @@ namespace DAIS.CoreBusiness.Services
                     .Include(x => x.Region)
                     .Include(x => x.Manufacturer)
                     .Include(x => x.Location)
+                    .ThenInclude(x=>x.SubDivision)                    
                     .Include(x => x.Supplier)
-                    .Include(x => x.SubDivision)
-                    .Include(x=>x.SubDivision.Division)
+                    
                     .Include(x=>x.WorkPackage)
                     .FirstOrDefaultAsync().ConfigureAwait(false);
                 materialDto = _materialServiceInfrastructure.Mapper.Map<MaterialDto>(material);
-                materialDto.Division = _materialServiceInfrastructure.Mapper.Map<DivisionDto>(material.SubDivision.Division);
+                if (material.DivisionId.HasValue)
+                {
+                    materialDto.Division = await _materialServiceDependencies.DivisionService.GetDivision((Guid)material.DivisionId);
+                }
+                
             }
             catch (Exception ex)
             {
@@ -287,7 +406,6 @@ namespace DAIS.CoreBusiness.Services
                     .Include(x => x.Manufacturer)
                     .Include(x => x.Location)
                     .Include(x => x.Supplier)
-                    .Include(x => x.SubDivision)
                     .ToListAsync().ConfigureAwait(false);
 
                 if (!IsAdminUser(roleName))
@@ -329,8 +447,9 @@ namespace DAIS.CoreBusiness.Services
                     .Include(x => x.Region)
                     .Include(x => x.Manufacturer)
                     .Include(x => x.Location)
+                    .ThenInclude(x => x.SubDivision)
+                    .ThenInclude(x => x.Division)
                     .Include(x => x.Supplier)
-                    .Include(x => x.SubDivision)
                     .Include(x=>x.WorkPackage)
                     .Include(x=>x.Measurement)
                     .FirstOrDefaultAsync().ConfigureAwait(false);
@@ -360,7 +479,6 @@ namespace DAIS.CoreBusiness.Services
                     .Include(x => x.Manufacturer)
                     .Include(x => x.Location)
                     .Include(x => x.Supplier)
-                    .Include(x => x.SubDivision)
                     .Include(x => x.WorkPackage)
                     .Include(x => x.Measurement)
                     .ToListAsync().ConfigureAwait(false);
@@ -391,7 +509,6 @@ namespace DAIS.CoreBusiness.Services
                     .Include(x => x.Manufacturer)
                     .Include(x => x.Location)
                     .Include(x => x.Supplier)
-                    .Include(x => x.SubDivision)
                     .ToListAsync().ConfigureAwait(false);
 
                 if (!IsAdminUser(roleName))
@@ -432,12 +549,14 @@ namespace DAIS.CoreBusiness.Services
                     && x.IsRehabilitation==(materialFilterDto.KindOfMaterial=="Material"?false:true))
                     .Include(x => x.MaterialType)
                     .Include(x => x.Category)
+                    .ThenInclude(x=>x.MaterialType)
                     .Include(x => x.Region)
                     .Include(x => x.Manufacturer)
                     .Include(x => x.Location)
+                    .ThenInclude(x => x.SubDivision)
+                    .ThenInclude(x => x.Division)
                     .Include(x => x.Supplier)
-                    .Include(x => x.SubDivision)
-                    .Include(x=>x.SubDivision.Division)
+                    
                     .Include(x=>x.WorkPackage)
                     .ToListAsync().ConfigureAwait(false);
 
@@ -453,8 +572,16 @@ namespace DAIS.CoreBusiness.Services
                 {
                     var materialDto = _materialServiceInfrastructure.Mapper.Map<MaterialDto>(material);
                     materialDto.MaterialStatus = Enum.GetName(typeof(MaterialStatus), material.MaterialStatus);
-                    materialDto.Division = _materialServiceInfrastructure.Mapper.Map<DivisionDto>(material.SubDivision.Division);
-                   
+                    if (material.DivisionId != null)
+                    {
+                        materialDto.Division = await _materialServiceDependencies
+                            .DivisionService.GetDivision((Guid)material.DivisionId);
+                    }
+                    if(material.SubDivisionId != null)
+                    {
+                        materialDto.SubDivision = await _materialServiceDependencies
+                           .SubDivisionService.GetSubDivision((Guid)material.SubDivisionId);
+                    }
                     materialDtoList.Add(materialDto);
                 }
             }
@@ -471,7 +598,7 @@ namespace DAIS.CoreBusiness.Services
         {
             UserTypes currentRole = (UserTypes)Enum.Parse(typeof(UserTypes), roleName);
 
-            if (UserTypes.Admin == currentRole || UserTypes.SuperAdmin == currentRole)
+            if (UserTypes.Admin == currentRole)
             {
                 return true;
             }

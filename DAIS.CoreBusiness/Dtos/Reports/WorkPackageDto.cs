@@ -4,8 +4,13 @@ namespace DAIS.CoreBusiness.Dtos.Reports
 {
     public class WorkPackageDto
     {
+        private string workPackageName;
         public Guid? Id { get; set; }
-        public string WorkPackageName { get; set; }
+        public string WorkPackageName
+        {
+            get => workPackageName;
+            set => workPackageName = value?.ToUpper();
+        }
         public string WorkPackageCode { get; set; }
         public string? System { get; set; }
         public DateTime? StartDate { get; set; }
@@ -14,7 +19,7 @@ namespace DAIS.CoreBusiness.Dtos.Reports
         public DateTime? CommencementDate { get; set; }
         public string? ContractPackageDetails { get; set; }
         public string Remarks {  get; set; }
-        public Guid ProjectId { get; set; }
+        public Guid? ProjectId { get; set; }
         public ProjectDto? Project { get; set; }
     }
 }

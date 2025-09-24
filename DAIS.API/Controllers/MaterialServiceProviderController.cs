@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace DAIS.API.Controllers
 {
@@ -16,11 +17,12 @@ namespace DAIS.API.Controllers
     {
         private readonly IMaterialServiceProviderService _materialServiceProvider;
         private readonly MaterialConfigSettings _materialConfig;
-        public MaterialServiceProviderController(IMaterialServiceProviderService materialServiceProvider,
-             IOptions<MaterialConfigSettings> materialConfig)
+        private readonly IFileManagerService _fileManagerService;
+        private readonly string folderName = "MaterialDocument" + "\\" + "ServiceProviderDocument" + "\\";
+        public MaterialServiceProviderController(IMaterialServiceProviderService materialServiceProvider, IFileManagerService fileManagerService)
         {
             _materialServiceProvider = materialServiceProvider;
-            _materialConfig = materialConfig.Value;
+            _fileManagerService = fileManagerService;
 
         }
         [HttpGet("GetAllMaterialServiceProvides")]
@@ -36,7 +38,7 @@ namespace DAIS.API.Controllers
             return Ok(listMaterialService);
         }
         [HttpPost]
-        public async Task<IActionResult> AddServiceProviderAsync([FromForm] IFormFile? serviceProviderDocument, [FromForm] string serviceProviderData)
+        public async Task<IActionResult> AddServiceProviderAsync(List<IFormFile> serviceProviderDocument, [FromForm] string serviceProviderData)
         {
             if (serviceProviderData == null || string.IsNullOrEmpty(serviceProviderData))
             {
@@ -44,18 +46,27 @@ namespace DAIS.API.Controllers
             }
             var serviceProviderDto = JsonConvert.DeserializeObject<MaterialServiceProviderDto>(serviceProviderData);
 
-            if (serviceProviderDocument != null)
+            if (serviceProviderDocument.Count > 0)
             {
-                serviceProviderDto.ServiceProviderDocument = await SaveServiceProviderDocument(serviceProviderDocument);
+                StringBuilder uploadedFiles = new StringBuilder();
+                string documentFiles = string.Empty;
+                foreach (var serviceProviderDocumentDocumentFile in serviceProviderDocument)
+                {
+                    var (isSuccess, savedFile) = await _fileManagerService.UploadAndEncryptFile(serviceProviderDocumentDocumentFile, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
+
+                }
+                serviceProviderDto.ServiceProviderDocument = uploadedFiles.ToString();
             }
             var response = await _materialServiceProvider.AddServiceProviderAsync(serviceProviderDto);
             return Ok(response);
         }
-        
+
 
         [HttpPut]
 
-        public async Task<IActionResult> UpdateServiceProviderAsync([FromForm] IFormFile? serviceProviderDocument, [FromForm] string serviceProviderData)
+        public async Task<IActionResult> UpdateServiceProviderAsync(List<IFormFile> serviceProviderDocument, [FromForm] string serviceProviderData)
         {
             if (serviceProviderData == null || string.IsNullOrEmpty(serviceProviderData))
             {
@@ -63,14 +74,21 @@ namespace DAIS.API.Controllers
             }
             var serviceProviderDto = JsonConvert.DeserializeObject<MaterialServiceProviderDto>(serviceProviderData);
 
-            if (serviceProviderDocument != null)
+            if (serviceProviderDocument.Count > 0)
             {
-                serviceProviderDto.ServiceProviderDocument = await SaveServiceProviderDocument(serviceProviderDocument);
+                StringBuilder uploadedFiles = new StringBuilder();
+                string documentFiles = string.Empty;
+                foreach (var serviceProviderDocumentDocumentFile in serviceProviderDocument)
+                {
+                    var (isSuccess, savedFile) = await _fileManagerService.UploadAndEncryptFile(serviceProviderDocumentDocumentFile, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
+
+                }
+                serviceProviderDto.ServiceProviderDocument = uploadedFiles.ToString();
             }
             var response = await _materialServiceProvider.UpdateServiceProviderAsync(serviceProviderDto);
             return Ok(response);
-
-
         }
         [HttpDelete]
         public async Task<IActionResult> DeleteServiceProviderAsync(Guid id)
@@ -80,23 +98,17 @@ namespace DAIS.API.Controllers
 
 
         }
-        private async Task<string> SaveServiceProviderDocument([FromForm] IFormFile? documentFile)
+        [HttpGet("download-encrypted/{encodedPath}")]
+        public async Task<IActionResult> DownloadEncrypted(string encodedPath)
         {
-            var folderName = "MaterialDocument" + "\\"+ "ServiceProviderDocument"+"\\";
-            var basePath = _materialConfig.DocumentBasePath;
-            string fileName = string.Empty;
-            string filePath = string.Empty;
-            fileName = documentFile.FileName;
-            var dir = Path.Combine(basePath, folderName);
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-            filePath = Path.Combine(folderName, fileName);
-            var fullFilePath = Path.Combine(dir, fileName);
-            await documentFile.CopyToAsync(new FileStream(fullFilePath, FileMode.Create));
+            var base64EncodedBytes = Convert.FromBase64String(encodedPath);
+            var decodedPath = Encoding.UTF8.GetString(base64EncodedBytes);
+            var (stream, isSicess) = await _fileManagerService.GetEncryptedFile(decodedPath);
 
-            return filePath;
+            if (!isSicess)
+                return NotFound("File not found.");
+
+            return File(stream, "application/octet-stream", decodedPath);
         }
     }
 }

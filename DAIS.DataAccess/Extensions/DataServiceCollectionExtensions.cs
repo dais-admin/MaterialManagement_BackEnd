@@ -18,8 +18,7 @@ namespace DAIS.DataAccess.Extensions
 
             }).AddIdentity<User, Role>(options =>
             {
-                options.User.RequireUniqueEmail = true;
-                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; // Only letters and digits
+                options.User.RequireUniqueEmail = true;             
                 options.Password.RequireDigit = true;
             }).AddEntityFrameworkStores<AppDbContext>()
              .AddDefaultTokenProviders();

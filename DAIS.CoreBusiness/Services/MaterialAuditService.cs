@@ -146,9 +146,7 @@ namespace DAIS.CoreBusiness.Services
                 }
             }
             catch(Exception ex) { }
-            {
-                
-            }
+            
             return result;
         }
         public async Task<IEnumerable<MaterialAuditDto>> GetMaterialAuditsByMaterialCodeAsync(string materialCode)

@@ -11,6 +11,8 @@ namespace DAIS.DataAccess.Entities
         public double? Longitude { get; set; }
         public string? Remarks { get; set; }
         public Guid WorkPackageId { get; set; }
+        public Guid SubDivisionId { get; set; }
+        public virtual SubDivision SubDivision { get; set; }
         public virtual WorkPackage WorkPackage { get; set; }
         public virtual ICollection<Material> Assets { get; set; }
     }

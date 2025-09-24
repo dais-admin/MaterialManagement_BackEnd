@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace DAIS.API.Controllers
 {
@@ -16,12 +17,14 @@ namespace DAIS.API.Controllers
     public class MaterialHardwareController : ControllerBase
     {
         private readonly IMaterialHardwareService _materialHardwareService;
-        private readonly MaterialConfigSettings _materialConfig;
+        private readonly IFileManagerService _fileManagerService;
+        private string folderName = "MaterialDocument" + "\\" + "HardwareDocument" + "\\";
+
         public MaterialHardwareController(IMaterialHardwareService materialHardwareService,
-            IOptions<MaterialConfigSettings> materialConfig)
+            IFileManagerService fileManagerService)
         {
             _materialHardwareService = materialHardwareService;
-            _materialConfig = materialConfig.Value;
+            _fileManagerService = fileManagerService;
         }
         [HttpGet("GetAllMaterialHardware")]
         public async Task<IActionResult> GetAllMaterialHardware()
@@ -42,53 +45,52 @@ namespace DAIS.API.Controllers
             return Ok( listMaterialHardware);
         }
         [HttpPost]
-        public async Task<IActionResult> AddMaterialHardwareAsync([FromForm] IFormFile? hardwareDocuments, [FromForm] string hardwareData)
+        public async Task<IActionResult> AddMaterialHardwareAsync(List<IFormFile> hardwareDocuments, [FromForm] string hardwareData)
         {
             if (hardwareData == null || string.IsNullOrEmpty(hardwareData))
             {
                 return BadRequest();
             }
             var materialHardwareDto = JsonConvert.DeserializeObject<MaterialHardwareDto>(hardwareData);
-
-            var hardwareDocumentFiles = Request.Form.Files;
-            if (hardwareDocumentFiles != null)
+            if (hardwareDocuments.Count>0)
             {
-                string documentFiles = string.Empty;
-                foreach (var hardwareDocument in hardwareDocumentFiles)
+                StringBuilder uploadedFiles = new StringBuilder();
+                foreach (var hardwareDocument in hardwareDocuments)
                 {
-                    documentFiles = documentFiles +
-                        await SaveHardwareDocument(hardwareDocument, materialHardwareDto.MaterialId) + ";";
+                    folderName = folderName + materialHardwareDto.MaterialId + "\\";
+                    var (isSucess, savedFile) = await _fileManagerService.UploadAndEncryptFile(hardwareDocument, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
                 }
-                if (!string.IsNullOrEmpty(documentFiles))
-                {
-                    materialHardwareDto.HardwareDocument = documentFiles;
-                }
-               
+                materialHardwareDto.HardwareDocument = uploadedFiles.ToString();
+
             }
 
             var response =await _materialHardwareService.AddMaterialHardwareAsync(materialHardwareDto);
             return Ok(response);
         }
         [HttpPut]
-        public async Task<IActionResult> UpdateMaterialHardwareAsync([FromForm] IFormFile? hardwareDocuments, [FromForm] string hardwareData)
+        public async Task<IActionResult> UpdateMaterialHardwareAsync(List<IFormFile> hardwareDocuments, [FromForm] string hardwareData)
         {
             if (hardwareData == null || string.IsNullOrEmpty(hardwareData))
             {
                 return BadRequest();
             }
             var materialHardwareDto = JsonConvert.DeserializeObject<MaterialHardwareDto>(hardwareData);
-            var hardwareDocumentFiles = Request.Form.Files;
-            if (hardwareDocumentFiles != null)
+            if (hardwareDocuments.Count > 0)
             {
-                string documentFiles = string.Empty;
-                foreach (var hardwareDocument in hardwareDocumentFiles)
+                StringBuilder uploadedFiles = new StringBuilder();
+                foreach (var hardwareDocument in hardwareDocuments)
                 {
-                    documentFiles = documentFiles +
-                        await SaveHardwareDocument(hardwareDocument, materialHardwareDto.MaterialId) + ";";
+                    folderName = folderName + materialHardwareDto.MaterialId + "\\";
+                    var (isSucess, savedFile) = await _fileManagerService.UploadAndEncryptFile(hardwareDocument, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
                 }
-                materialHardwareDto.HardwareDocument = documentFiles;
+                materialHardwareDto.HardwareDocument = uploadedFiles.ToString();
+
             }
-            
+
             var response = await _materialHardwareService.UpdateMaterialHardwareAsync(materialHardwareDto);
             return Ok(response);
         }
@@ -99,24 +101,17 @@ namespace DAIS.API.Controllers
             return Ok();
         }
 
-        private async Task<string> SaveHardwareDocument([FromForm] IFormFile? documentFile, Guid materialId)
+        [HttpGet("download-encrypted/{encodedPath}")]
+        public async Task<IActionResult> DownloadEncrypted(string encodedPath)
         {
-            var folderName = "MaterialDocument" + "\\" + materialId + "\\";
-            var basePath = _materialConfig.DocumentBasePath;
-            string fileName = string.Empty;
-            string filePath = string.Empty;
-            fileName = documentFile.FileName;
-            var dir = Path.Combine(basePath, folderName);
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-            filePath = Path.Combine(folderName, fileName);
-            var fullFilePath = Path.Combine(dir, fileName);
-            await documentFile.CopyToAsync(new FileStream(fullFilePath, FileMode.Create));
+            var base64EncodedBytes = Convert.FromBase64String(encodedPath);
+            var decodedPath = Encoding.UTF8.GetString(base64EncodedBytes);
+            var (stream, isSicess) = await _fileManagerService.GetEncryptedFile(decodedPath);
 
-            return filePath;
+            if (!isSicess)
+                return NotFound("File not found.");
+
+            return File(stream, "application/octet-stream", decodedPath);
         }
-
     }
 }

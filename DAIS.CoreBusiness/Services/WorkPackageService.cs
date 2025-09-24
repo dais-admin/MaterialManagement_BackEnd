@@ -176,7 +176,7 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var workPackage = _genericRepo.Query()                  
-                    .FirstOrDefault(x=>x.WorkPackageName==name);
+                    .FirstOrDefault(x=>x.WorkPackageName.ToLower()==name.ToLower());
                 workPackageDto = _mapper.Map<WorkPackageDto>(workPackage);
 
             }

@@ -3,11 +3,13 @@ using DAIS.CoreBusiness.Dtos;
 using DAIS.CoreBusiness.Interfaces;
 using DAIS.CoreBusiness.Services;
 using DAIS.DataAccess.Entities;
+using Dias.ExcelSteam.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace DAIS.API.Controllers
 {
@@ -17,12 +19,14 @@ namespace DAIS.API.Controllers
     public class MaterialSoftwareController : ControllerBase
     {
         private readonly IMaterialSoftwareService _materialSoftwareService;
-        private readonly MaterialConfigSettings _materialConfig;
-        public MaterialSoftwareController(IMaterialSoftwareService materialSoftwareService, 
-            IOptions<MaterialConfigSettings> materialConfig)
+        private readonly IFileManagerService _fileManagerService;
+        private string folderName = "MaterialDocument" + "\\" + "SoftwareDocuments" + "\\";
+
+        public MaterialSoftwareController(IMaterialSoftwareService materialSoftwareService,
+            IFileManagerService fileManagerService)
         {
             _materialSoftwareService = materialSoftwareService;
-            _materialConfig=materialConfig.Value;
+            _fileManagerService = fileManagerService;
 
             
         }
@@ -45,23 +49,24 @@ namespace DAIS.API.Controllers
             return Ok(listMaterialSoftware);
         }
         [HttpPost]
-        public async Task<IActionResult> AddMaterialSoftwareAsync([FromForm] IFormFile? softwareDocuments, [FromForm] string softwareData)
+        public async Task<IActionResult> AddMaterialSoftwareAsync(List<IFormFile> softwareDocuments, [FromForm] string softwareData)
         {
             if (softwareData == null || string.IsNullOrEmpty(softwareData))
             {
                 return BadRequest();
             }
-            var materialSoftwareDto = JsonConvert.DeserializeObject<MaterialSoftwareDto>(softwareData);
-            var softwareDocumentFiles = Request.Form.Files;
-            if (softwareDocumentFiles != null)
+            var materialSoftwareDto = JsonConvert.DeserializeObject<MaterialSoftwareDto>(softwareData);          
+            if (softwareDocuments.Count>0)
             {
-                string documentFiles = string.Empty;
-                foreach( var softwareDocument in softwareDocumentFiles)
+                StringBuilder uploadedFiles = new StringBuilder();
+                foreach (var softwareDocument in softwareDocuments)
                 {
-                    documentFiles = documentFiles + 
-                        await SaveSoftwareDocument(softwareDocument, materialSoftwareDto.MaterialId)+";";
+                    folderName = folderName + materialSoftwareDto.MaterialId + "\\";
+                    var (isSucess, savedFile) = await _fileManagerService.UploadAndEncryptFile(softwareDocument, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
                 }
-                materialSoftwareDto.SoftwareDocument = documentFiles;
+                materialSoftwareDto.SoftwareDocument = uploadedFiles.ToString(); 
             }
             var response = await _materialSoftwareService.AddMaterialSoftwareAsync(materialSoftwareDto);
             return Ok(response);
@@ -77,24 +82,18 @@ namespace DAIS.API.Controllers
             await _materialSoftwareService.DeleteMaterialSoftwareAsync(id);
             return Ok();
         }
-        private async Task<string> SaveSoftwareDocument([FromForm] IFormFile? documentFile, Guid materialId)
+        
+        [HttpGet("download-encrypted/{encodedPath}")]
+        public async Task<IActionResult> DownloadEncrypted(string encodedPath)
         {
-            var folderName = "MaterialDocument" + "\\" + materialId + "\\";
-            var basePath = _materialConfig.DocumentBasePath;
-            string fileName = string.Empty;
-            string filePath = string.Empty;
-            fileName = documentFile.FileName;
-            var dir = Path.Combine(basePath, folderName);
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-            filePath = Path.Combine(folderName, fileName);
-            var fullFilePath = Path.Combine(dir, fileName);
-            await documentFile.CopyToAsync(new FileStream(fullFilePath, FileMode.Create));
+            var base64EncodedBytes = Convert.FromBase64String(encodedPath);
+            var decodedPath = Encoding.UTF8.GetString(base64EncodedBytes);
+            var (stream, isSicess) = await _fileManagerService.GetEncryptedFile(decodedPath);
 
-            return filePath;
+            if (!isSicess)
+                return NotFound("File not found.");
+
+            return File(stream, "application/octet-stream", decodedPath);
         }
-
     }
 }

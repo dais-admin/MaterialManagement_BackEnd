@@ -83,7 +83,7 @@ namespace Dias.ExcelSteam.Repositories
                     material.CategoryId = category.Id;
                     material.SupplierId = supplier.Id;
                     material.ManufacturerId = manufacturer.Id;
-                    material.SubDivisionId = division.Id;
+                    //material.SubDivisionId = division.Id;
                     material.LocationId = location.Id;
                     material.RegionId = region.Id;
                     material.Supplier = supplier;

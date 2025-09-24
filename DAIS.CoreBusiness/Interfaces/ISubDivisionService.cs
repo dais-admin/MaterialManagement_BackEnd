@@ -8,7 +8,7 @@ namespace DAIS.CoreBusiness.Interfaces
         Task<SubDivisionDto> UpdateSubDivision(SubDivisionDto subDivisionDto);
         Task DeleteSubDivision(Guid id);
         Task<List<SubDivisionDto>> GetAllSubDivision();
-        SubDivisionDto GetSubDivisionIdByName(string name, Guid divisionId);
+        SubDivisionDto GetSubDivisionIdByName(string name);
         Task<List<SubDivisionDto>> GetAllSubDivisionsByDivision(Guid divisionId);
     }
 }
