@@ -24,6 +24,7 @@ namespace DAIS.CoreBusiness.Dtos
         public string? Remarks {  get; set; }
         public string? ServiceProviderDocument { get; set; }
         public Guid ManufacturerId { get; set; }
+        public ManufacturerDto? Manufacturer { get; set; }
         public Guid? ContractorId { get; set; }
         public  ContractorDto? Contractor { get; set; }
   

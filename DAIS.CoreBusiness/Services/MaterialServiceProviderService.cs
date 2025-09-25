@@ -67,7 +67,8 @@ namespace DAIS.CoreBusiness.Services
             {
                 
                 var serviceProviderList = await _genericRepo.Query()
-                    .Include(x=>x.Contractor).ToListAsync().ConfigureAwait(false);
+                    .Include(x=>x.Contractor)
+                     .Include(x => x.Manufacturer).ToListAsync().ConfigureAwait(false);
                 materialServiceProviderDtoList.AddRange(_mapper.Map<List<MaterialServiceProviderDto>>(serviceProviderList));    
                
 
@@ -90,7 +91,8 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var serviceprovider = await _genericRepo.Query()
-                    .Include(x=> x.Contractor).FirstOrDefaultAsync(x=>x.Id == id).ConfigureAwait(false);    
+                    .Include(x=> x.Contractor)
+                    .Include(x => x.Manufacturer).FirstOrDefaultAsync(x=>x.Id == id).ConfigureAwait(false);    
                 materialServiceProviderDto =_mapper.Map<MaterialServiceProviderDto>(serviceprovider);
               // var Serviceprovider = _mapper.Map<MaterialServiceProvider>(materialServiceProviderDto);
 
