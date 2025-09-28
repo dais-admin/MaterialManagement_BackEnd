@@ -554,8 +554,8 @@ namespace DAIS.CoreBusiness.Services
 
                     var subDivisionToDivisionReport = new SubDivisionToDivisionMaterialIssueReceiveItemDto()
                     {
-                        IssueReceiveSubDivisionId = material.SubDivisionId.Value,
-                        IssueReceiveSubDivision = _mapper.Map<SubDivisionDto>(subDivision),
+                        IssueSubDivisionId = material.SubDivisionId.Value,
+                        IssueSubDivision = _mapper.Map<SubDivisionDto>(subDivision),
                         ReceiveDivisionId = item.DivisionId.Value,
                         ReceiveDivision = division,
                         Material = _mapper.Map<MaterialDto>(material),
@@ -580,8 +580,8 @@ namespace DAIS.CoreBusiness.Services
 
                         var subDivisionToDivisionReport = new SubDivisionToDivisionMaterialIssueReceiveItemDto()
                         {
-                            IssueReceiveSubDivisionId = item.SubDivisionId.Value,
-                            IssueReceiveSubDivision = _mapper.Map<SubDivisionDto>(subDivision),
+                            IssueSubDivisionId = item.SubDivisionId.Value,
+                            IssueSubDivision = _mapper.Map<SubDivisionDto>(subDivision),
                             ReceiveDivisionId = item.DivisionId.Value,
                             ReceiveDivision = division,
                             Material = _mapper.Map<MaterialDto>(item),
@@ -597,7 +597,7 @@ namespace DAIS.CoreBusiness.Services
                 }
 
                 _logger.LogInformation("SubDivisionToDivisionMaterialTransferService:GetSubDivisionToDivisionMaterialIssueReceiveByDateRange:Method End");
-                return subDivisionToDivisionMaterialIssueReceiveItemList.OrderBy(x => x.IssueReceiveSubDivision.SubDivisionName).ToList();
+                return subDivisionToDivisionMaterialIssueReceiveItemList.OrderBy(x => x.IssueSubDivision.SubDivisionName).ToList();
             }
             catch (Exception ex)
             {
