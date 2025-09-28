@@ -30,6 +30,7 @@ namespace DAIS.CoreBusiness.Mapper
             CreateMap<SubDivisionDto, SubDivision>().ReverseMap();
             CreateMap<BulkUploadDetailsDto,BulkUploadDetail>().ReverseMap();
             CreateMap<MaterialMaintenaceDto, MaterialMaintenance>().ReverseMap();
+            CreateMap<DesignDocumentDto,DesignDocument>().ReverseMap();
 
             CreateMap<Material, MaterialDto>().ReverseMap();
             CreateMap<MaterialDto, Material>()
