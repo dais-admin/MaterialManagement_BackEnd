@@ -508,8 +508,8 @@ namespace DAIS.CoreBusiness.Services
 
                     var divisionLocationReport = new DivisionLocationMaterialIssueReceiveItemDto()
                     {
-                        IssueReceiveDivisionId = material.DivisionId.Value,
-                        IssueReceiveDivision = division,
+                        IssuingDivisionId = material.DivisionId.Value,
+                        issuingDivision = division,
                         ReceiveLocationId = item.LocationId,
                         ReceiveLocation = _mapper.Map<LocationOperationDto>(location),
                         Material = _mapper.Map<MaterialDto>(material),
@@ -534,8 +534,8 @@ namespace DAIS.CoreBusiness.Services
 
                         var divisionLocationReport = new DivisionLocationMaterialIssueReceiveItemDto()
                         {
-                            IssueReceiveDivisionId = item.DivisionId.Value,
-                            IssueReceiveDivision = division,
+                            IssuingDivisionId = item.DivisionId.Value,
+                            issuingDivision = division,
                             ReceiveLocationId = item.LocationId.Value,
                             ReceiveLocation = _mapper.Map<LocationOperationDto>(location),
                             Material = _mapper.Map<MaterialDto>(item),
@@ -551,7 +551,7 @@ namespace DAIS.CoreBusiness.Services
                 }
 
                 _logger.LogInformation("DivisionLocationMaterialTransferService:GetDivisionLocationMaterialIssueReceiveByDateRange:Method End");
-                return divisionLocationMaterialIssueReceiveItemList.OrderBy(x => x.IssueReceiveDivision.DivisionName).ToList();
+                return divisionLocationMaterialIssueReceiveItemList.OrderBy(x => x.issuingDivision.DivisionName).ToList();
             }
             catch (Exception ex)
             {

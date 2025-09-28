@@ -75,6 +75,8 @@ namespace DAIS.DataAccess.Data
         public DbSet<SubDivisionMaterialTransferApproval> SubDivisionMaterialTransferApprovals { get; set; }
         public DbSet<DivisionLocationMaterialTransferApproval> DivisionLocationMaterialTransferApprovals { get; set; }
 
+        public DbSet<DesignDocument> DesignDocuments { get; set; }
+
         public DbSet<AppBackupDetail> AppBackupDetails {  get; set; }
         public override int SaveChanges()
         {

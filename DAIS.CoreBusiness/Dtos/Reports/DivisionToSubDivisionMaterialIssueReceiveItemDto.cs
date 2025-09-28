@@ -2,8 +2,8 @@ namespace DAIS.CoreBusiness.Dtos.Reports
 {
     public class DivisionToSubDivisionMaterialIssueReceiveItemDto
     {
-        public Guid IssueReceiveDivisionId { get; set; }
-        public DivisionDto IssueReceiveDivision { get; set; }
+        public Guid IssuingDivisionId { get; set; }
+        public DivisionDto IssuingDivision { get; set; }
         public Guid ReceiveSubDivisionId { get; set; }
         public SubDivisionDto ReceiveSubDivision { get; set; }
         public Guid MaterialId { get; set; }
