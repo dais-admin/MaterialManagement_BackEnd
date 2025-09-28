@@ -20,6 +20,7 @@ namespace DAIS.DataAccess.Entities
         public DateTime? EndPeriodLifeDate { get; set; }
         public string ModelNumber { get; set; }
         public MaterialStatus MaterialStatus { get; set; }
+        public string? CurrentApprovalStatus {  get; set; }
 
         [ForeignKey("TypeId")]
         public Guid? TypeId { get; set; }
@@ -69,6 +70,7 @@ namespace DAIS.DataAccess.Entities
         public string? RehabilitationMaterialCode { get; set; }
        
         public virtual ICollection<MaterialApproval> MaterialApprovals {  get; set; }
+        public virtual ICollection<ApprovalStatusHistory> ApprovalStatusHistory { get; set; }
         public virtual ICollection<MaterialDocument> MaterialDocuments { get; set; }
     }
 }

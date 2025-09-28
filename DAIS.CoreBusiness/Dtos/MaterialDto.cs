@@ -25,6 +25,7 @@ namespace DAIS.CoreBusiness.Dtos
         public string? Remarks { get; set; }
         public string? RehabilitationMaterialCode {  get; set; }
         public Guid? BuilkUploadDetailId { get; set; }
+        public string? CurrentApprovalStatus {  get; set; }
 
         public Guid? TypeId { get; set; }
         public  MaterialTypeDto? MaterialType { get; set; }
@@ -63,5 +64,7 @@ namespace DAIS.CoreBusiness.Dtos
 
         public Guid? ContractorId { get; set; }
         public  ContractorDto? ContractorName { get;  set; }
+
+        public List<ApprovalStatusHistoryDto>? ApprovalStatusHistory { get; set; }
     }
 }

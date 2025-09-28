@@ -19,12 +19,15 @@ namespace DAIS.API.Controllers
     public class MaterialApprovalController : ControllerBase
     {
         private readonly IMaterialApprovalService _materialApprovalService;
+        private readonly IApprovalStatusHistoryService _approverStatusHistoryService;
         private readonly MaterialConfigSettings _materialConfig;
         public MaterialApprovalController(IMaterialApprovalService materialApprovalService,
-            IOptions<MaterialConfigSettings> materialConfig)
+            IOptions<MaterialConfigSettings> materialConfig,
+            IApprovalStatusHistoryService approverStatusHistoryService)
         {
             _materialApprovalService = materialApprovalService;
             _materialConfig = materialConfig.Value;
+            _approverStatusHistoryService = approverStatusHistoryService;
         }
         [HttpPost("AddApproval")]
         public async Task<ActionResult<MaterialApprovalDto>> AddApproval(ApprovalInformationDto approvalInformationDto)
@@ -38,6 +41,13 @@ namespace DAIS.API.Controllers
             var materialApprovalDto = await _materialApprovalService.AddMaterialBulkApproval(bulkApprovalInformationDto);
             return Ok(materialApprovalDto);
         }
+        [HttpPost("AddApprovalStausHistory")]
+        public async Task<IActionResult> AddApprovalStatusHistory(ApprovalStatusHistoryDto approvalStatusHistoryDto)
+        {
+            var result = await _approverStatusHistoryService.AddApprovalStatusHistory(approvalStatusHistoryDto);
+            return Ok(result);
+        }
+
         [HttpPut("UpdateApproval")]
         public async Task<ActionResult<MaterialApprovalDto>> UpdateApproval(ApprovalInformationDto approvalInformationDto)
         {
@@ -60,6 +70,14 @@ namespace DAIS.API.Controllers
             var materialApprovalDto = await _materialApprovalService.UpdateMaterialBulkApprovalStatus(bulkApprovalInfoDto);
             return Ok(materialApprovalDto);
         }
+        [HttpGet("GetMaterialsApprovalStatusByUser")]
+        public async Task<IActionResult> GetMaterialsApprovalStatusByUser(string approvalStatus, string userEmail)
+        {
+            var statuses = approvalStatus?.Split(',');
+            var listToReview = await _approverStatusHistoryService.GetMaterialsWithStatusHistoryByUser(statuses.ToList(), userEmail);
+            return Ok(listToReview);
+        }
+
         [HttpGet("GetMaterialsByStatus")]
         public async Task<IActionResult> GetMaterialsForReview(ApprovalStatus approvalStatus, bool isActive,string userId)
         {
