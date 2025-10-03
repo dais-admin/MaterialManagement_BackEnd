@@ -64,7 +64,7 @@ namespace DAIS.API.Extensions
             services.AddScoped<IDivisionToSubDivisionMaterialTransferService, DivisionToSubDivisionMaterialTransferService>();
             services.AddScoped<ISubDivisionToDivisionMaterialTransferService, SubDivisionToDivisionMaterialTransferService>();
             services.AddScoped<IApprovalStatusHistoryService, ApprovalStatusHistoryService>();
-
+            services.AddScoped<IDesignDocumentService, DesignDocumentService>();
             services.AddScoped<IFileManagerService, FileManagerService>();
 
             services.AddScoped<MaterialServiceDependencies>(provider =>

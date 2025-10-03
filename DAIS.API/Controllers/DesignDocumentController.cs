@@ -1,9 +1,9 @@
-﻿using DAIS.CoreBusiness.Dtos;
+﻿using DAIS.API.Helpers;
+using DAIS.CoreBusiness.Dtos;
 using DAIS.CoreBusiness.Interfaces;
 using DAIS.CoreBusiness.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Text;
 
@@ -11,18 +11,26 @@ namespace DAIS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+   // [Authorize]
     public class DesignDocumentController : ControllerBase
     {
         private readonly IDesignDocumentService _designDocumentService;
-        private readonly IFileManagerService _fileManagerService;
+       
         private string folderName = "MaterialDocument" + "\\" + "DesignDocuments" + "\\";
+       
+        private readonly MaterialConfigSettings _materialConfig;
+        private readonly IFileManagerService _fileManagerService;
+        private string _filePath = string.Empty;
+        private string _fileName = string.Empty;
 
 
-        public DesignDocumentController(IDesignDocumentService designDocumentService, IFileManagerService fileManagerService)
+
+        public DesignDocumentController(IDesignDocumentService designDocumentService, IOptions<MaterialConfigSettings> materialConfig, IFileManagerService fileManagerService)
         {
             _designDocumentService = designDocumentService;
+            _materialConfig = materialConfig.Value;
             _fileManagerService = fileManagerService;
+
             
         }
         [HttpGet("GetAllDesignlDocumentAsync")]
@@ -31,47 +39,66 @@ namespace DAIS.API.Controllers
             var listDesignlDocument = await _designDocumentService.GetAllDesignlDocumentAsync();
             return Ok(listDesignlDocument);
         }
-        [HttpGet("GetDesignDocumentByIdAsync")]
+        [HttpGet("GetDesignDocumentById")]
         public async Task<IActionResult> GetDesignDocumentByIdAsync(Guid Id)
         {
             var listDesignDocument = await _designDocumentService.GetDesignDocumentByIdAsync(Id);
             return Ok(listDesignDocument);
         }
-        [HttpPost]
-        public async Task<IActionResult> AddDesignDocumentAsync(List<IFormFile> designDocuments, [FromForm] string designDocumentData)
-        {
-            if (designDocumentData == null || string.IsNullOrEmpty(designDocumentData))
-            {
-                return BadRequest();
-            }
-            var designDocumentDto = JsonConvert.DeserializeObject<DesignDocumentDto>(designDocumentData);
-                if (designDocuments.Count > 0)
-            {
-                StringBuilder uploadedFiles = new StringBuilder();
-                foreach (var designDocument in designDocuments)
-                {
-                    var (isSucess, savedFile) = await _fileManagerService.UploadAndEncryptFile(designDocument, folderName);
-                    uploadedFiles.Append(savedFile);
-                    uploadedFiles.Append(";");
-                }
-                designDocumentDto.DocumentFileName =uploadedFiles.ToString();
-               
-            }
-
-            var response = await _designDocumentService.AddDesignDocumentAsync(designDocumentDto);
-               
-            return Ok(response);
-        }
-        [HttpPut]
-        public async Task<IActionResult> UpdateDesignDocumentAsync(DesignDocumentDto designDocumentDto)
-        {
-            return Ok(await _designDocumentService.UpdateDesignDocumentAsync(designDocumentDto));
-        }
+        
         [HttpDelete]
         public async Task<IActionResult> DeleteDesignDocumentAsync(Guid Id)
         {
             await _designDocumentService.DeleteDesignDocumentAsync(Id);
             return Ok();
+        }
+
+        [HttpPost("upload")]
+        public async Task<IActionResult> AddDesignDocument(List<IFormFile> documentFileName, [FromForm] string documentData)
+        {
+            if (documentData == null || string.IsNullOrEmpty(documentData))
+            {
+                return BadRequest();
+            }
+            var documentDto = JsonConvert.DeserializeObject<DesignDocumentDto>(documentData);
+            if (documentFileName.Count > 0)
+            {
+                StringBuilder uploadedFiles = new StringBuilder();
+                foreach (var designDocument in documentFileName)
+                {
+                    var (isSucess, savedFile) = await _fileManagerService.UploadAndEncryptFile(designDocument, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
+                }
+                documentDto.DocumentFileName = uploadedFiles.ToString();
+            }
+
+            var response = await _designDocumentService.AddDesignDocumentAsync(documentDto);
+            return Ok(response);
+        }
+
+        [HttpPut("UpdateDesignDocument")]
+        public async Task<IActionResult> UpdateDesignDocumentAsync(List<IFormFile> documentFileName, [FromForm] string documentData)
+        {
+            if (documentData == null || string.IsNullOrEmpty(documentData))
+            {
+                return BadRequest();
+            }
+            var documentDto = JsonConvert.DeserializeObject<DesignDocumentDto>(documentData);
+            if (documentFileName.Count > 0)
+            {
+                StringBuilder uploadedFiles = new StringBuilder();
+                foreach (var designDocument in documentFileName)
+                {
+                    var (isSucess, savedFile) = await _fileManagerService.UploadAndEncryptFile(designDocument, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
+                }
+                documentDto.DocumentFileName = uploadedFiles.ToString();
+            }
+
+            var response = await _designDocumentService.UpdateDesignDocumentAsync(documentDto);
+            return Ok(response);
         }
 
         [HttpGet("download-encrypted/{encodedPath}")]
@@ -86,6 +113,7 @@ namespace DAIS.API.Controllers
 
             return File(stream, "application/octet-stream", decodedPath);
         }
+
 
     }
 }
