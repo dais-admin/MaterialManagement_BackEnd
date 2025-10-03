@@ -167,6 +167,20 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("MaterialWarrantyService:UpdateWarrantyAsync:Method Start");
             try
             {
+                var existingWarranty = await _genericRepo.GetById(materialWarrantyDto.Id);
+                if (existingWarranty != null)
+                {
+                    if (existingWarranty.WarrantyDocument != null)
+                    {
+                        existingWarranty.WarrantyDocument = materialWarrantyDto.WarrantyDocument;
+
+                    }
+                    existingWarranty.UpdatedDate = DateTime.Now;
+                    existingWarranty.WarrantyStartDate = materialWarrantyDto.WarrantyStartDate;
+                    existingWarranty.WarrantyEndDate = materialWarrantyDto.WarrantyEndDate;
+                    existingWarranty.DLPStartDate = materialWarrantyDto.DLPStartDate;
+                    existingWarranty.DLPEndDate = materialWarrantyDto.DLPEndDate;
+                }
                 var materialWarranty = _mapper.Map<MaterialWarranty>(materialWarrantyDto);
                 await _genericRepo.Update(materialWarranty);
             }

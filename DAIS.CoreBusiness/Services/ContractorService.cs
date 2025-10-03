@@ -131,8 +131,23 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("ContractorService:UpdateContractor:Method Start");
             try
             {
-                var contractor = _mapper.Map<Contractor>(contractorDto);
-                await _genericRepo.Update(contractor);
+                var existingContractorDocument = await _genericRepo.GetById(contractorDto.Id);
+                if(existingContractorDocument != null)
+                {
+                    if(contractorDto.ContractorDocument != null)
+                    {
+                        existingContractorDocument.ContractorDocument =contractorDto.ContractorDocument;
+                    }
+                    existingContractorDocument.UpdatedDate =DateTime.Now;
+                    existingContractorDocument.ContractorName = contractorDto.ContractorName;
+                    existingContractorDocument.ContractorAddress = contractorDto.ContractorAddress;
+                    existingContractorDocument.ContactNo = contractorDto.ContactNo;
+                    existingContractorDocument.ProductsDetails = contractorDto.ProductsDetails;
+
+
+                }
+             
+                await _genericRepo.Update(existingContractorDocument);
 
             }
             catch (Exception ex)

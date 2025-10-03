@@ -138,6 +138,16 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("MaterialMaintenanceService:UpdateMaterialMaintenaceAsync:Method Start");
             try
             {
+                var existingMaintenance = await _genericRepo.GetById(materialMaintenaceDto.Id);
+                if (existingMaintenance != null)
+                {
+                    if(existingMaintenance.MaintenanceDocument!=null)
+                    {
+                        existingMaintenance.MaintenanceDocument =materialMaintenaceDto.MaintenanceDocument;
+                    }
+                    existingMaintenance.MaintenanceStartDate = materialMaintenaceDto.MaintenanceStartDate;
+                    existingMaintenance.MaintenanceEndDate = materialMaintenaceDto.MaintenanceEndDate;
+                }
                 var maintenance = _mapper.Map<MaterialMaintenance>(materialMaintenaceDto);
                 await _genericRepo.Update(maintenance);
             }
