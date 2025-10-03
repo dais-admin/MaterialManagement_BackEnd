@@ -6,8 +6,6 @@ namespace DAIS.DataAccess.Entities
     {
       
         public Guid ProjectId { get; set; }
-        public virtual Project Project { get; set; }
-
         public Guid WorkPackageId { get; set; }
         public virtual WorkPackage WorkPackage { get; set; }
         public string DesignDocumentName { get; set; }
