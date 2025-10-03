@@ -74,9 +74,23 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("ManufacturerService:UpdateManufactuter:Method  Start");
             try
             {
-                var  manufactuter=_mapper.Map<Manufacturer>(manufacturerDto);
-                await _genericRepo.Update(manufactuter);
-                
+                var existingManufacturer = await _genericRepo.GetById(manufacturerDto.Id);
+                if (existingManufacturer != null)
+                {
+                    if (manufacturerDto.ManufacturerDocument != null)
+                    {
+                        existingManufacturer.ManufacturerDocument = manufacturerDto.ManufacturerDocument;
+                    }
+                    existingManufacturer.UpdatedDate = DateTime.Now;
+                    existingManufacturer.ManufacturerName = manufacturerDto.ManufacturerName;
+                    existingManufacturer.ManufacturerAddress = manufacturerDto.ManufacturerAddress;
+                    existingManufacturer.ProductsDetails = manufacturerDto.ProductsDetails;
+                    existingManufacturer.ImportantDetails = manufacturerDto.ImportantDetails;
+                    existingManufacturer.ContactNo = manufacturerDto.ContactNo;
+                    existingManufacturer.ContactEmail = manufacturerDto.ContactEmail;
+                }
+
+                await _genericRepo.Update(existingManufacturer);
             }
             catch (Exception ex) 
             {

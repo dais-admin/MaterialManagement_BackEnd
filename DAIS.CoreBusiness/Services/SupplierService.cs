@@ -112,10 +112,26 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("SupplierService:UpdateSupplier:Method Start");
             try
             {
-                var supplier = _mapper.Map<Supplier>(supplierDto);
-                await _genericRepo.Update(supplier);
-                
+                var existingSupplier = await _genericRepo.GetById(supplierDto.Id);
+                if (existingSupplier != null)
+                {
+                    if (supplierDto.SupplierDocument != null)
+                    {
+                        existingSupplier.SupplierDocument = supplierDto.SupplierDocument;
+                    }
+                    existingSupplier.UpdatedDate = DateTime.Now;
+                    existingSupplier.SupplierName = supplierDto.SupplierName;
+                    existingSupplier.SupplierAddress = supplierDto.SupplierAddress;
+                    existingSupplier.ProductsDetails = supplierDto.ProductsDetails;
+                    existingSupplier.Remarks = supplierDto.Remarks;
+                    existingSupplier.ContactNo = supplierDto.ContactNo;
+                    existingSupplier.ContactEmail = supplierDto.ContactEmail;
+                }
+
+                await _genericRepo.Update(existingSupplier);
             }
+               
+           
             catch (Exception ex) 
             {
                 _logger.LogError(ex.Message, ex);
