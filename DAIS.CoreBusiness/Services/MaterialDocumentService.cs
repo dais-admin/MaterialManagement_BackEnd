@@ -25,7 +25,8 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("MaterialDocumentService:AddMaterialDocumentAsync:Method Start");
             try
             {
-                materialDocumentDto.CreatedDate = DateTime.UtcNow;
+                materialDocumentDto.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
                 var materialDocument=_mapper.Map<MaterialDocument>(materialDocumentDto);
                 var dbEntity=await _genericRepository.Add(materialDocument);
                 materialDocumentDto.Id= dbEntity.Id;

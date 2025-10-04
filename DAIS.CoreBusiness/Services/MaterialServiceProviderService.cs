@@ -111,10 +111,24 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("MaterialServiceProvider:UpdateServiceProviderAsync:Method Start");
             try
             {
-                var serviceprovider = _mapper.Map<MaterialServiceProvider>(serviceProviderDto);
-                await _genericRepo.Update(serviceprovider);
+                var existingServiceProvider = await _genericRepo.GetById(serviceProviderDto.Id);
+                if (existingServiceProvider != null)
+                {
+                    if (serviceProviderDto.ServiceProviderDocument != null)
+                    {
+                        existingServiceProvider.ServiceProviderDocument = serviceProviderDto.ServiceProviderDocument;
+                    }
+                    existingServiceProvider.UpdatedDate = DateTime.Now;
+                    existingServiceProvider.ServiceProviderName = serviceProviderDto.ServiceProviderName;
+                    existingServiceProvider.Address = serviceProviderDto.Address;
+                    existingServiceProvider.ContactNo = serviceProviderDto.ContactNo;
+                    existingServiceProvider.ContactEmail = serviceProviderDto.ContactEmail;
+                    existingServiceProvider.Remarks = serviceProviderDto.Remarks;
+                }
 
+                await _genericRepo.Update(existingServiceProvider);
             }
+            
             catch (Exception ex) 
             {
                 _logger.LogError(ex.Message, ex);

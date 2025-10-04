@@ -134,6 +134,19 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("MaterialSoftwareService: UpdateMaterialSoftwareAsync:Method Start");
             try
             {
+                var existingSoftwareDocument = await _genericRepo.GetById(materialSoftwareDto.Id);
+               if(existingSoftwareDocument != null)
+                {
+                    if (existingSoftwareDocument.SoftwareDocument != null)
+                    {
+                        existingSoftwareDocument.SoftwareDocument = materialSoftwareDto.SoftwareDocument;
+                    }
+
+                    existingSoftwareDocument .Quantity = materialSoftwareDto.Quantity;
+                    existingSoftwareDocument.StartDate = materialSoftwareDto.StartDate;
+                    existingSoftwareDocument.EndDate = materialSoftwareDto.EndDate;
+                    existingSoftwareDocument.Remarks = materialSoftwareDto.Remarks;
+                }
                 var materialSoftware=_mapper.Map<MaterialSoftware>(materialSoftwareDto);
                 await _genericRepo.Update(materialSoftware);
                

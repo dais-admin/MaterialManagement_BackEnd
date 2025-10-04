@@ -9,5 +9,7 @@ namespace DAIS.CoreBusiness.Interfaces
         Task DeleteDesignDocumentAsync(Guid Id);
         Task<DesignDocumentDto> GetDesignDocumentByIdAsync(Guid Id);
         Task<List<DesignDocumentDto>> GetAllDesignlDocumentAsync();
+
+        DesignDocumentDto GetDesignDocumentIdByName(string name);
     }
 }

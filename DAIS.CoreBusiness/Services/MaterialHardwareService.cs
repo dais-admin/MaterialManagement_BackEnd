@@ -47,8 +47,24 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("MaterialHardwareService:UpdateMaterialHardwareAsync:Method Start");
             try
             {
-                var materialHardware = _mapper.Map<MaterialHardware>(materialHardwareDto);
-                await _genericRepo.Update(materialHardware);
+                var existingHardwareDocument = await _genericRepo.GetById(materialHardwareDto.Id);
+                if (existingHardwareDocument != null)
+                {
+                    if (existingHardwareDocument.HardwareDocument != null)
+                    {
+                        existingHardwareDocument.HardwareDocument = materialHardwareDto.HardwareDocument;
+                    }
+                    existingHardwareDocument.UpdatedDate = DateTime.Now;
+                    existingHardwareDocument.HarwareName = materialHardwareDto.HarwareName;
+                    existingHardwareDocument.Chipset = materialHardwareDto.Chipset;
+                    existingHardwareDocument.NetworkDetails = materialHardwareDto.NetworkDetails;
+                    existingHardwareDocument.DateOfManufacturer = materialHardwareDto.DateOfManufacturer;
+                    existingHardwareDocument.DiskDetails = materialHardwareDto.DiskDetails;
+                    existingHardwareDocument.Remarks = materialHardwareDto.Remarks;
+                    existingHardwareDocument.Quantity = materialHardwareDto.Quantity;
+                }
+
+                await _genericRepo.Update(existingHardwareDocument);
             }
             catch (Exception ex)
             {
