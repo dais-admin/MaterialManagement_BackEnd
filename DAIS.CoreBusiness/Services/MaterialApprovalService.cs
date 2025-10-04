@@ -109,11 +109,11 @@ namespace DAIS.CoreBusiness.Services
             MaterialApprovalDto materialApprovalDto = new MaterialApprovalDto();
             try
             {
-                foreach (var reviewerApproverId in bulkApprovalInformationDto.ReviewerApproverIds)
+                foreach (var reviewerApproverId in bulkApprovalInformationDto.ReviewerApproverEmailIds)
                 {
-                    materialApprovalDto.ApprovalStatus =
-                    (ApprovalStatus)bulkApprovalInformationDto.ApprovalStatus;                  
-                    materialApprovalDto.SubmitterId = bulkApprovalInformationDto.CurrentUserId;
+                    //materialApprovalDto.ApprovalStatus =
+                    //(ApprovalStatus)bulkApprovalInformationDto.ApprovalStatus;                  
+                    //materialApprovalDto.SubmitterId = bulkApprovalInformationDto.CurrentUserId;
                     materialApprovalDto.ReveiwerId = reviewerApproverId;
                     materialApprovalDto.CreatedDate = DateTime.UtcNow;
                     materialApprovalDto.IsActive = true;
@@ -132,7 +132,7 @@ namespace DAIS.CoreBusiness.Services
                     new BulkUploadDetailsDto()
                     {
                         Id = bulkApprovalInformationDto.BulkUploadDetailId,
-                        ApprovalStatus = bulkApprovalInformationDto.ApprovalStatus,
+                        //ApprovalStatus = bulkApprovalInformationDto.ApprovalStatus,
                         Comment = bulkApprovalInformationDto.Comment,
                     });
 
@@ -335,16 +335,16 @@ namespace DAIS.CoreBusiness.Services
                     string userIdForEmail = string.Empty;
                     foreach (var materialApproval in materialApprovals)
                     {
-                        materialApproval.ApprovalStatus =
-                        (ApprovalStatus)bulkApprovalInformationDto.ApprovalStatus;
+                       // materialApproval.ApprovalStatus =
+                        //(ApprovalStatus)bulkApprovalInformationDto.ApprovalStatus;
 
                         switch (materialApproval.ApprovalStatus)
                         {
                             case ApprovalStatus.Reviewed:
-                                materialApproval.ApproverId = bulkApprovalInformationDto.ReviewerApproverIds.FirstOrDefault();
+                                //materialApproval.ApproverId = bulkApprovalInformationDto.ReviewerApproverIds.FirstOrDefault();
                                 materialApproval.ReviewedDate = DateTime.Now;
                                 materialApproval.ReviewerComment = bulkApprovalInformationDto.Comment;
-                                userIdForEmail = bulkApprovalInformationDto.ReviewerApproverIds.FirstOrDefault();
+                                //userIdForEmail = bulkApprovalInformationDto.ReviewerApproverIds.FirstOrDefault();
                                 break;
 
                             case ApprovalStatus.Approved:
@@ -388,7 +388,7 @@ namespace DAIS.CoreBusiness.Services
                     new BulkUploadDetailsDto()
                     {
                         Id = bulkApprovalInformationDto.BulkUploadDetailId,
-                        ApprovalStatus = bulkApprovalInformationDto.ApprovalStatus,
+                        //ApprovalStatus = bulkApprovalInformationDto.ApprovalStatus,
                         Comment = bulkApprovalInformationDto.Comment,
                     });
 

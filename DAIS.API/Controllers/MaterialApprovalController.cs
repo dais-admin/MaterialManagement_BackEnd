@@ -38,7 +38,7 @@ namespace DAIS.API.Controllers
         [HttpPost("AddBulkApproval")]
         public async Task<ActionResult<MaterialApprovalDto>> AddBulkApproval(BulkApprovalInformationDto bulkApprovalInformationDto)
         {
-            var materialApprovalDto = await _materialApprovalService.AddMaterialBulkApproval(bulkApprovalInformationDto);
+            var materialApprovalDto = await _approverStatusHistoryService.AddBulkApprovalStatusHistory(bulkApprovalInformationDto);
             return Ok(materialApprovalDto);
         }
         [HttpPost("AddApprovalStausHistory")]
@@ -108,7 +108,15 @@ namespace DAIS.API.Controllers
         public async Task<IActionResult> GetBulkApprovalMaterialListByUserId(string userId, string userRole)
         {
             var materialList = await _materialApprovalService.GetBulkApprovalMaterialListByUserId(userId, userRole);
+            
             return Ok(materialList);
+        }
+        [HttpGet("GetBulkUploadMaterialListByUser")]
+        public async Task<IActionResult> GetBulkUploadMaterialListByUser(string approvalStatus, string userEmail)
+        {
+            var statuses = approvalStatus?.Split(',');
+            var bulkUplloadDetailList = _approverStatusHistoryService.GetBulkApprovalMaterialsWithStatusHistoryByUser(statuses.ToList(), userEmail);
+            return Ok(bulkUplloadDetailList);
         }
         private async Task<string> SaveBulkUploadFile([FromForm] IFormFile? bulkUploadFile, string fileName)
         {

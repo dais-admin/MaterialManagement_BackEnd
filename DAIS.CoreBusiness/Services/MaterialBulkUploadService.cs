@@ -918,6 +918,7 @@ namespace DAIS.CoreBusiness.Services
                 NoOfRecords = uploadedCount,
                 CreatedBy = userName,
                 CreatedDate = DateTime.UtcNow,
+               
             };
             return _bulkUploadDetailService.AddBulkUploadDetail(bulkUploadDetailDto);           
         }
