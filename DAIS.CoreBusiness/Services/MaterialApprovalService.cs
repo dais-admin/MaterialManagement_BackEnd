@@ -82,7 +82,8 @@ namespace DAIS.CoreBusiness.Services
                     materialApprovalDto.MaterialId = approvalInformationDto.MaterialId;
                     materialApprovalDto.SubmitterId = approvalInformationDto.CurrentUserId;
                     materialApprovalDto.ReveiwerId = reviewerApproverId;
-                    materialApprovalDto.CreatedDate = DateTime.UtcNow;
+                    materialApprovalDto.CreatedDate =TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")); ;
                     materialApprovalDto.IsActive = true;
                     var materialApproval = _mapper.Map<MaterialApproval>(materialApprovalDto);
                     var dbEntity = await _genericRepository.Add(materialApproval);
@@ -115,7 +116,8 @@ namespace DAIS.CoreBusiness.Services
                     (ApprovalStatus)bulkApprovalInformationDto.ApprovalStatus;                  
                     materialApprovalDto.SubmitterId = bulkApprovalInformationDto.CurrentUserId;
                     materialApprovalDto.ReveiwerId = reviewerApproverId;
-                    materialApprovalDto.CreatedDate = DateTime.UtcNow;
+                    materialApprovalDto.CreatedDate = DateTime.UtcNow.AddHours(5.5);
+                    materialApprovalDto.IsActive = true;
                     materialApprovalDto.IsActive = true;
 
                     var materialIds = await _materialService.GetAllMaterialIdsByBulkUploadIdAsync(bulkApprovalInformationDto.BulkUploadDetailId);
@@ -267,34 +269,46 @@ namespace DAIS.CoreBusiness.Services
                     {
                         case ApprovalStatus.Reviewed:
                             materialApproval.ApproverId = approvalInformationDto.ReviewerApproverIds.FirstOrDefault();
-                            materialApproval.ReviewedDate = DateTime.Now;
+                            materialApproval.ReviewedDate =  TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")); 
+                            materialApprovalDto.IsActive = true;
                             materialApproval.ReviewerComment = approvalInformationDto.Comment;
                             userIdForEmail = approvalInformationDto.ReviewerApproverIds.FirstOrDefault();
                             break;
 
                         case ApprovalStatus.Approved:
-                            materialApproval.ApprovedDate = DateTime.Now;
+                            materialApproval.ApprovedDate =  TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")); ;
+                            materialApprovalDto.IsActive = true;
                             materialApproval.ApproverComment = approvalInformationDto.Comment;
                             userIdForEmail = materialApproval.SubmitterId;
                             break;
                         case ApprovalStatus.ReviewerReturned:
                             materialApproval.ReviewerComment = approvalInformationDto.Comment;
-                            materialApproval.ReviewedDate = DateTime.Now;                          
+                            materialApproval.ReviewedDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")); ;
+                            materialApprovalDto.IsActive = true;
                             userIdForEmail = materialApproval.SubmitterId;
                             break;
                         case ApprovalStatus.ReviewerRejected:
                             materialApproval.ReviewerComment = approvalInformationDto.Comment;
-                            materialApproval.ReviewedDate = DateTime.Now;
+                            materialApproval.ReviewedDate =  TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")); ;
+                            materialApprovalDto.IsActive = true;
                             userIdForEmail = materialApproval.SubmitterId;
                             break;
                         case ApprovalStatus.ApproverReturened:
                             materialApproval.ApproverComment = approvalInformationDto.Comment;
-                            materialApproval.ApprovedDate = DateTime.Now;
+                            materialApproval.ApprovedDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")); ;
+                            materialApprovalDto.IsActive = true;
                             userIdForEmail = materialApproval.SubmitterId;
                             break;
                         case ApprovalStatus.ApproverRejected:
                             materialApproval.ApproverComment = approvalInformationDto.Comment;
-                            materialApproval.ApprovedDate = DateTime.Now;
+                            materialApproval.ApprovedDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")); ;
+                            materialApprovalDto.IsActive = true;
                             userIdForEmail = materialApproval.SubmitterId;
                             break;
 
@@ -348,28 +362,33 @@ namespace DAIS.CoreBusiness.Services
                                 break;
 
                             case ApprovalStatus.Approved:
-                                materialApproval.ApprovedDate = DateTime.Now;
+                                materialApproval.ApprovedDate= TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
                                 materialApproval.ApproverComment = bulkApprovalInformationDto.Comment;
                                 userIdForEmail = materialApproval.SubmitterId;
                                 break;
                             case ApprovalStatus.ReviewerReturned:
                                 materialApproval.ReviewerComment = bulkApprovalInformationDto.Comment;
-                                materialApproval.ReviewedDate = DateTime.Now;
+                                materialApproval.ReviewedDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
                                 userIdForEmail = materialApproval.SubmitterId;
                                 break;
                             case ApprovalStatus.ReviewerRejected:
                                 materialApproval.ReviewerComment = bulkApprovalInformationDto.Comment;
-                                materialApproval.ReviewedDate = DateTime.Now;
+                                materialApproval.ReviewedDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")); 
                                 userIdForEmail = materialApproval.SubmitterId;
                                 break;
                             case ApprovalStatus.ApproverReturened:
                                 materialApproval.ApproverComment = bulkApprovalInformationDto.Comment;
-                                materialApproval.ApprovedDate = DateTime.Now;
+                                materialApproval.ApprovedDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")); 
                                 userIdForEmail = materialApproval.SubmitterId;
                                 break;
                             case ApprovalStatus.ApproverRejected:
                                 materialApproval.ApproverComment = bulkApprovalInformationDto.Comment;
-                                materialApproval.ApprovedDate = DateTime.Now;
+                                materialApproval.ApprovedDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")); 
                                 userIdForEmail = materialApproval.SubmitterId;
                                 break;
 

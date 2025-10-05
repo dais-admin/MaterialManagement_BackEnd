@@ -141,15 +141,15 @@ namespace DAIS.CoreBusiness.Services
                 var existingMaintenance = await _genericRepo.GetById(materialMaintenaceDto.Id);
                 if (existingMaintenance != null)
                 {
-                    if(existingMaintenance.MaintenanceDocument!=null)
+                    if (!string.IsNullOrEmpty(existingMaintenance.MaintenanceDocument))
                     {
                         existingMaintenance.MaintenanceDocument =materialMaintenaceDto.MaintenanceDocument;
                     }
                     existingMaintenance.MaintenanceStartDate = materialMaintenaceDto.MaintenanceStartDate;
                     existingMaintenance.MaintenanceEndDate = materialMaintenaceDto.MaintenanceEndDate;
                 }
-                var maintenance = _mapper.Map<MaterialMaintenance>(materialMaintenaceDto);
-                await _genericRepo.Update(maintenance);
+                
+                await _genericRepo.Update(existingMaintenance);
             }
             catch (Exception ex)
             {
