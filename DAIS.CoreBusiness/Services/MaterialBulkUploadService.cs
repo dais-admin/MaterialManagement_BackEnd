@@ -916,9 +916,9 @@ namespace DAIS.CoreBusiness.Services
                 FileName = newFileName,
                 FilePath = folderPath,
                 NoOfRecords = uploadedCount,
-                CreatedBy = userName,
-                CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
-                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"))
+                ChangedBy = userName,
+                ChangedDate = DateTime.UtcNow,
+               
             };
             return _bulkUploadDetailService.AddBulkUploadDetail(bulkUploadDetailDto);           
         }

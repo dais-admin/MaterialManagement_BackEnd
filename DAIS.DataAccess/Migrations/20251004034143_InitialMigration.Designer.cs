@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAIS.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250929044018_Add New Table")]
-    partial class AddNewTable
+    [Migration("20251004034143_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -204,8 +204,11 @@ namespace DAIS.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("ApprovalStatus")
-                        .HasColumnType("int");
+                    b.Property<string>("ActionRequiredByUserEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ApprovalStatus")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Comment")
                         .HasColumnType("nvarchar(max)");

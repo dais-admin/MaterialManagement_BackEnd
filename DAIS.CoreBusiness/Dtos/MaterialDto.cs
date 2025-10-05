@@ -41,9 +41,7 @@ namespace DAIS.CoreBusiness.Dtos
         public SubDivisionDto? SubDivision { get; set; }
         public Guid? LocationId { get; set; }      
         public LocationOperationDto? Location { get; set; }
-
         
-
         public Guid? ManufacturerId { get; set; }
         public ManufacturerDto? Manufacturer { get; set; }
         

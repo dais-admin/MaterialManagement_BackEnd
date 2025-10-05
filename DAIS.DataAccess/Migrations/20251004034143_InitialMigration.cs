@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DAIS.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class InitailMigration : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -93,7 +93,8 @@ namespace DAIS.DataAccess.Migrations
                     FileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NoOfRecords = table.Column<int>(type: "int", nullable: false),
-                    ApprovalStatus = table.Column<int>(type: "int", nullable: true),
+                    ApprovalStatus = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ActionRequiredByUserEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Comment = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -583,6 +584,32 @@ namespace DAIS.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DesignDocuments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    WorkPackageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DesignDocumentName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DocumentFileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DesignDocuments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DesignDocuments_WorkPackages_WorkPackageId",
+                        column: x => x.WorkPackageId,
+                        principalTable: "WorkPackages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "LocationOperations",
                 columns: table => new
                 {
@@ -778,6 +805,7 @@ namespace DAIS.DataAccess.Migrations
                     EndPeriodLifeDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ModelNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     MaterialStatus = table.Column<int>(type: "int", nullable: false),
+                    CurrentApprovalStatus = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     MaterialTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -859,6 +887,34 @@ namespace DAIS.DataAccess.Migrations
                         name: "FK_Materials_WorkPackages_WorkPackageId",
                         column: x => x.WorkPackageId,
                         principalTable: "WorkPackages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ApprovalStatusHistory",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StatusChangeDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    StatusChangeBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ActionRequiredByUserEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ApprovalStatus = table.Column<int>(type: "int", nullable: false),
+                    Comments = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MaterialId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApprovalStatusHistory", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ApprovalStatusHistory_Materials_MaterialId",
+                        column: x => x.MaterialId,
+                        principalTable: "Materials",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1856,6 +1912,11 @@ namespace DAIS.DataAccess.Migrations
                 filter: "[AgencyName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ApprovalStatusHistory_MaterialId",
+                table: "ApprovalStatusHistory",
+                column: "MaterialId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
@@ -1952,6 +2013,11 @@ namespace DAIS.DataAccess.Migrations
                 name: "IX_Contractors_MaterialTypeId",
                 table: "Contractors",
                 column: "MaterialTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DesignDocuments_WorkPackageId",
+                table: "DesignDocuments",
+                column: "WorkPackageId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DivisionLocationMaterialTransferApprovals_DivisionLocationMaterialTransferId",
@@ -2556,6 +2622,9 @@ namespace DAIS.DataAccess.Migrations
                 name: "AppBackupDetails");
 
             migrationBuilder.DropTable(
+                name: "ApprovalStatusHistory");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -2572,6 +2641,9 @@ namespace DAIS.DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "AuditLogs");
+
+            migrationBuilder.DropTable(
+                name: "DesignDocuments");
 
             migrationBuilder.DropTable(
                 name: "DivisionLocationMaterialTransferApprovals");

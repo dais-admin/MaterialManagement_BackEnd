@@ -5,6 +5,8 @@ using DAIS.CoreBusiness.Interfaces;
 using DAIS.DataAccess.Extensions;
 using Dias.ExcelSteam.Connection;
 using Dias.ExcelSteam.Extensions;
+using DocumentFormat.OpenXml.AdditionalCharacteristics;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Serilog;
 
 internal class Program
@@ -13,7 +15,7 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.CreateConfiguration();
-
+       
         builder.Host.UseDiasMetrics(_ => { });
         builder.Host.UseSerilog((context, configuration) =>
             configuration.ReadFrom.Configuration(context.Configuration));
@@ -73,5 +75,5 @@ internal class Program
             endpoints.MapHub<NotificationHub>("/notificationHub");
         });
         app.Run();
-    }
+    }  
 }
