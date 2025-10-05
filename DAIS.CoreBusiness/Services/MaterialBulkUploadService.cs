@@ -916,8 +916,8 @@ namespace DAIS.CoreBusiness.Services
                 FileName = newFileName,
                 FilePath = folderPath,
                 NoOfRecords = uploadedCount,
-                CreatedBy = userName,
-                CreatedDate = DateTime.UtcNow,
+                ChangedBy = userName,
+                ChangedDate = DateTime.UtcNow,
                
             };
             return _bulkUploadDetailService.AddBulkUploadDetail(bulkUploadDetailDto);           

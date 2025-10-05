@@ -1,6 +1,7 @@
 ﻿
 using AutoMapper;
 using DAIS.CoreBusiness.Dtos;
+using DAIS.CoreBusiness.Dtos.Reports;
 using DAIS.CoreBusiness.Helpers;
 using DAIS.CoreBusiness.Interfaces;
 using DAIS.DataAccess.Entities;
@@ -155,6 +156,7 @@ namespace DAIS.CoreBusiness.Services
                     TagNumber = material.TagNumber,
                     ModelNumber = material.ModelNumber,
                     MaterialQty = material.MaterialQty,
+                    BuilkUploadDetailId = material.BuilkUploadDetailId,
                     CurrentApprovalStatus = material.CurrentApprovalStatus,
                     ApprovalStatusHistory = material.ApprovalStatusHistory.Select(history => new ApprovalStatusHistoryDto
                     {
@@ -174,6 +176,55 @@ namespace DAIS.CoreBusiness.Services
             return marialListWithStatusHistory;
         }
 
+        public async Task<IEnumerable<MaterialDto>> GetMaterialsStatusByProjectWorkpackage(string approvalStatus, Guid workpackageId,Guid? locationId)
+        {
+            IEnumerable<MaterialDto> marialListWithStatusHistory = new List<MaterialDto>();
+
+            try
+            {
+                var materialListQuery = _materialRepo.Query()
+                    .Where(x => x.WorkPackageId == workpackageId)                   
+                    .Include(x => x.WorkPackage)                    
+                    .AsQueryable();
+
+                if (approvalStatus != null && approvalStatus !="0")
+                {
+                    materialListQuery = materialListQuery.Where(s => approvalStatus.Equals(s.CurrentApprovalStatus));
+                }
+                if (locationId != null && locationId != Guid.Empty)
+                    materialListQuery = materialListQuery.Where(x => x.LocationId == locationId);
+                           
+
+                var materialList = await materialListQuery.ToListAsync();
+
+                marialListWithStatusHistory = materialList.Select(material => new MaterialDto
+                {
+                    Id = material.Id,
+                    MaterialName = material.MaterialName,
+                    MaterialCode = material.MaterialCode,
+                    TagNumber = material.TagNumber,
+                    ModelNumber = material.ModelNumber,
+                    MaterialQty = material.MaterialQty,
+                    BuilkUploadDetailId = material.BuilkUploadDetailId,
+                    CurrentApprovalStatus = material.CurrentApprovalStatus,
+                    WorkPackageId = material.WorkPackageId,
+                    WorkPackage = new WorkPackageDto
+                    {
+                        Id = material.WorkPackage.Id,
+                        WorkPackageCode = material.WorkPackage.WorkPackageCode,
+                        WorkPackageName = material.WorkPackage.WorkPackageName
+                    }
+
+                }); 
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                throw ex;
+            }
+            return marialListWithStatusHistory;
+        }
         public async Task<IEnumerable<BulkUploadDetailsDto>> GetBulkApprovalMaterialsWithStatusHistoryByUser(List<string>? approvalStatuses, string currentUserEmail)
         {
             IEnumerable<BulkUploadDetailsDto> bulkUploadDetailsDtoList = new List<BulkUploadDetailsDto>();
@@ -186,13 +237,21 @@ namespace DAIS.CoreBusiness.Services
                     .Select(s => (ApprovalStatus)Enum.Parse(typeof(ApprovalStatus), s, true))
                     .ToList();
 
-                
-
-                var materialBulkUploadList = await _bulkUploadDetailRepo.Query()
-                .Where(m => m.ActionRequiredByUserEmail == currentUserEmail
-                && approvalStatuses.Contains(m.ApprovalStatus))
-                
-                .ToListAsync();
+                List<BulkUploadDetail> materialBulkUploadList = new List<BulkUploadDetail>();
+                if (statusEnums.Contains(ApprovalStatus.None))
+                {
+                    materialBulkUploadList = await _bulkUploadDetailRepo.Query()
+                    .Where(m => m.CreatedBy == currentUserEmail
+                        && m.ApprovalStatus==null)
+                        .ToListAsync();
+                }
+                else
+                {
+                     materialBulkUploadList = await _bulkUploadDetailRepo.Query()
+                    .Where(m => m.ActionRequiredByUserEmail == currentUserEmail
+                        && approvalStatuses.Contains(m.ApprovalStatus))
+                        .ToListAsync();
+                }
 
                 bulkUploadDetailsDtoList = materialBulkUploadList.Select(bm => new BulkUploadDetailsDto
                 {
@@ -202,7 +261,9 @@ namespace DAIS.CoreBusiness.Services
                     FilePath = bm.FilePath,
                     Comment = bm.Comment,
                     ApprovalStatus = bm.ApprovalStatus,
-                    
+                    ChangedBy = bm.UpdatedBy,
+                    ChangedDate = bm.UpdatedDate
+
                 });
 
             }
@@ -263,6 +324,7 @@ namespace DAIS.CoreBusiness.Services
                     existingBulkUploadDetail.UpdatedBy = bulkApprovalInformationDto.CurrentUserEmailId;
                     existingBulkUploadDetail.UpdatedDate = DateTime.Now;
                     existingBulkUploadDetail.ActionRequiredByUserEmail = userEmail;
+                    await _bulkUploadDetailRepo.Update(existingBulkUploadDetail);
                 }
             }
             catch(Exception ex)
@@ -277,10 +339,8 @@ namespace DAIS.CoreBusiness.Services
         {
             var bulkUploadedMaterialslIds = await _materialRepo.Query()
                        .Where(h => h.BuilkUploadDetailId == bulkApprovalInformationDto.BulkUploadDetailId
-                           && h.CurrentApprovalStatus.Equals(ApprovalStatus.ReviewerReturned.ToString())
-                           || h.CurrentApprovalStatus.Equals(ApprovalStatus.ReviewerRejected.ToString())
-                           || h.CurrentApprovalStatus.Equals(ApprovalStatus.ApproverReturened.ToString())
-                           || h.CurrentApprovalStatus.Equals(ApprovalStatus.ApproverRejected.ToString()))
+                           && h.CurrentApprovalStatus.Equals(ApprovalStatus.Submmitted.ToString())
+                           || h.CurrentApprovalStatus.Equals(ApprovalStatus.Reviewed.ToString())     )
                        .Select(m => m.Id)
                        .ToListAsync();
 
@@ -288,7 +348,8 @@ namespace DAIS.CoreBusiness.Services
             {
                 var existngSubmittedmaterial = await _genericRepository.Query()
                 .Where(h => h.MaterialId == materialId
-                    && h.ApprovalStatus == ApprovalStatus.Submmitted)
+                    && h.ApprovalStatus == ApprovalStatus.Submmitted
+                           || h.ApprovalStatus == ApprovalStatus.Reviewed)
                 .OrderByDescending(h => h.StatusChangeDate)
                 .FirstOrDefaultAsync();
                
@@ -300,7 +361,7 @@ namespace DAIS.CoreBusiness.Services
                     StatusChangeDate = DateTime.Now,
                     Comments = bulkApprovalInformationDto.Comment,
                 };
-                await AddApprovalStatusHistory(approvalStatusHistoryDto, existngSubmittedmaterial.StatusChangeBy);
+                await AddApprovalStatusHistory(approvalStatusHistoryDto, existngSubmittedmaterial.CreatedBy);
             }
             return true;
         }
@@ -330,7 +391,7 @@ namespace DAIS.CoreBusiness.Services
         {
             var bulkUploadedMaterialslIds = await _materialRepo.Query()
                         .Where(h => h.BuilkUploadDetailId == bulkApprovalInformationDto.BulkUploadDetailId
-                            && h.CurrentApprovalStatus == null)
+                            && h.CurrentApprovalStatus == ApprovalStatus.Submmitted.ToString())
                         .Select(m => m.Id)
                         .ToListAsync();
             foreach (string userEmail in bulkApprovalInformationDto.ReviewerApproverEmailIds)
