@@ -98,7 +98,7 @@ namespace DAIS.CoreBusiness.Services
                 var existingDesignDocument = await _genericRepo.GetById(designDocumentDto.Id);
                 if (existingDesignDocument != null)
                 {
-                    if (designDocumentDto.DocumentFileName != null)
+                    if (!string.IsNullOrEmpty(designDocumentDto.DocumentFileName))
                     {
                         existingDesignDocument.DocumentFileName = designDocumentDto.DocumentFileName;
                     }

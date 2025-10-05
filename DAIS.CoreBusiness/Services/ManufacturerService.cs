@@ -77,7 +77,7 @@ namespace DAIS.CoreBusiness.Services
                 var existingManufacturer = await _genericRepo.GetById(manufacturerDto.Id);
                 if (existingManufacturer != null)
                 {
-                    if (manufacturerDto.ManufacturerDocument != null)
+                    if (!string.IsNullOrEmpty(manufacturerDto.ManufacturerDocument))
                     {
                         existingManufacturer.ManufacturerDocument = manufacturerDto.ManufacturerDocument;
                     }

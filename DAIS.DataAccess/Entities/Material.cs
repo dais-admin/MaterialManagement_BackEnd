@@ -12,7 +12,7 @@ namespace DAIS.DataAccess.Entities
         public string MaterialCode { get; set; }
         public int MaterialQty { get; set; }
         public string? LocationRFId { get; set; }
-        public DateTime PurchaseDate { get; set; }
+        public DateTime? PurchaseDate { get; set; }
         public DateTime? DateOfSupply { get; set; }
         public DateTime? CommissioningDate { get; set; }
         public DateTime? YearOfInstallation { get; set; }

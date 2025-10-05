@@ -134,7 +134,7 @@ namespace DAIS.CoreBusiness.Services
                 var existingContractorDocument = await _genericRepo.GetById(contractorDto.Id);
                 if(existingContractorDocument != null)
                 {
-                    if(contractorDto.ContractorDocument != null)
+                    if(!string.IsNullOrWhiteSpace(contractorDto.ContractorDocument))
                     {
                         existingContractorDocument.ContractorDocument =contractorDto.ContractorDocument;
                     }
