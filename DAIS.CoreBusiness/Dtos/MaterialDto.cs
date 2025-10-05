@@ -26,7 +26,8 @@ namespace DAIS.CoreBusiness.Dtos
         public string? RehabilitationMaterialCode {  get; set; }
         public Guid? BuilkUploadDetailId { get; set; }
         public string? CurrentApprovalStatus {  get; set; }
-
+        
+       
         public Guid? TypeId { get; set; }
         public  MaterialTypeDto? MaterialType { get; set; }
 
@@ -53,6 +54,7 @@ namespace DAIS.CoreBusiness.Dtos
         public bool? IsRehabilitation { get; set; }
         public string? CreatedBy { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public string? UpdatedBy { get; set; }
 
         public Guid WorkPackageId { get; set; }
         public WorkPackageDto? WorkPackage { get; set; }

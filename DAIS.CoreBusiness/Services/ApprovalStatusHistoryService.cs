@@ -208,6 +208,8 @@ namespace DAIS.CoreBusiness.Services
                     BuilkUploadDetailId = material.BuilkUploadDetailId,
                     CurrentApprovalStatus = material.CurrentApprovalStatus,
                     WorkPackageId = material.WorkPackageId,
+                    UpdatedBy = material.UpdatedBy,
+                    UpdatedDate = material.UpdatedDate,
                     WorkPackage = new WorkPackageDto
                     {
                         Id = material.WorkPackage.Id,
