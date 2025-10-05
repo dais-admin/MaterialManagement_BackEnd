@@ -114,7 +114,7 @@ namespace DAIS.CoreBusiness.Services
                 var existingServiceProvider = await _genericRepo.GetById(serviceProviderDto.Id);
                 if (existingServiceProvider != null)
                 {
-                    if (serviceProviderDto.ServiceProviderDocument != null)
+                    if (!string.IsNullOrEmpty(serviceProviderDto.ServiceProviderDocument))
                     {
                         existingServiceProvider.ServiceProviderDocument = serviceProviderDto.ServiceProviderDocument;
                     }

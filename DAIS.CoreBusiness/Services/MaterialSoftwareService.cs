@@ -116,7 +116,7 @@ namespace DAIS.CoreBusiness.Services
             MaterialSoftwareDto materialSoftwareDto = new MaterialSoftwareDto();
             try
             {
-                var materialSoftware = await _genericRepo.GetById(id);
+                var materialSoftware = await _genericRepo.Query().Include(x => x.Supplier).FirstOrDefaultAsync();
                 materialSoftwareDto = _mapper.Map<MaterialSoftwareDto>(materialSoftware);
             }
 
@@ -137,7 +137,7 @@ namespace DAIS.CoreBusiness.Services
                 var existingSoftwareDocument = await _genericRepo.GetById(materialSoftwareDto.Id);
                if(existingSoftwareDocument != null)
                 {
-                    if (existingSoftwareDocument.SoftwareDocument != null)
+                    if (!string.IsNullOrEmpty(materialSoftwareDto.SoftwareDocument))
                     {
                         existingSoftwareDocument.SoftwareDocument = materialSoftwareDto.SoftwareDocument;
                     }
@@ -147,8 +147,8 @@ namespace DAIS.CoreBusiness.Services
                     existingSoftwareDocument.EndDate = materialSoftwareDto.EndDate;
                     existingSoftwareDocument.Remarks = materialSoftwareDto.Remarks;
                 }
-                var materialSoftware=_mapper.Map<MaterialSoftware>(materialSoftwareDto);
-                await _genericRepo.Update(materialSoftware);
+               
+                await _genericRepo.Update(existingSoftwareDocument);
                
             }
             catch (Exception ex) 

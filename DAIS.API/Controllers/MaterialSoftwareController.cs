@@ -72,10 +72,34 @@ namespace DAIS.API.Controllers
             return Ok(response);
         }
         [HttpPut]
-        public async Task<IActionResult> UpdateMaterialSoftwareAsync(MaterialSoftwareDto materialSoftwareDto)
+
+
+        public async Task<IActionResult> UpdateMaterialSoftwareAsync(List<IFormFile> softwareDocuments, [FromForm] string softwareData)
         {
-            return Ok(await _materialSoftwareService.UpdateMaterialSoftwareAsync(materialSoftwareDto));
+            if (softwareData == null || string.IsNullOrEmpty(softwareData))
+            {
+                return BadRequest();
+            }
+            var materialSoftwareDto = JsonConvert.DeserializeObject<MaterialSoftwareDto>(softwareData);
+            if (softwareDocuments.Count > 0)
+            {
+                StringBuilder uploadedFiles = new StringBuilder();
+                foreach (var softwareDocument in softwareDocuments)
+                {
+                    folderName = folderName + materialSoftwareDto.MaterialId + "\\";
+                    var (isSucess, savedFile) = await _fileManagerService.UploadAndEncryptFile(softwareDocument, folderName);
+                    uploadedFiles.Append(savedFile);
+                    uploadedFiles.Append(";");
+                }
+                materialSoftwareDto.SoftwareDocument = uploadedFiles.ToString();
+            }
+            var response = await _materialSoftwareService.UpdateMaterialSoftwareAsync(materialSoftwareDto);
+            return Ok(response);
         }
+        //public async Task<IActionResult> UpdateMaterialSoftwareAsync(MaterialSoftwareDto materialSoftwareDto)
+        //{
+        //    return Ok(await _materialSoftwareService.UpdateMaterialSoftwareAsync(materialSoftwareDto));
+        //}
         [HttpDelete]
         public async Task<IActionResult> DeleteMaterialSoftwareAsync(Guid id)
         {

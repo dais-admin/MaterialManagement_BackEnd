@@ -604,8 +604,8 @@ namespace DAIS.CoreBusiness.Services
                         
 
                         //Purchase Date
-                        string purchaseDate = worksheet.Range[row, 18].Value;
-                        validation=CheckDateValidation("Purchase Date", purchaseDate, "R"+row);
+                        string purchaseDate = worksheet.Range[row, 18].Value.Trim();
+                        validation =CheckDateValidation("Purchase Date", purchaseDate, "R"+row);
                         if (validation.IsValidationSucess)
                         {
                             if (!string.IsNullOrEmpty(purchaseDate))
@@ -917,7 +917,8 @@ namespace DAIS.CoreBusiness.Services
                 FilePath = folderPath,
                 NoOfRecords = uploadedCount,
                 CreatedBy = userName,
-                CreatedDate = DateTime.UtcNow,
+                CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                 TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"))
             };
             return _bulkUploadDetailService.AddBulkUploadDetail(bulkUploadDetailDto);           
         }

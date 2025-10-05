@@ -50,7 +50,7 @@ namespace DAIS.CoreBusiness.Services
                 var existingHardwareDocument = await _genericRepo.GetById(materialHardwareDto.Id);
                 if (existingHardwareDocument != null)
                 {
-                    if (existingHardwareDocument.HardwareDocument != null)
+                    if (!string.IsNullOrEmpty(materialHardwareDto.HardwareDocument))
                     {
                         existingHardwareDocument.HardwareDocument = materialHardwareDto.HardwareDocument;
                     }
@@ -80,7 +80,7 @@ namespace DAIS.CoreBusiness.Services
             MaterialHardwareDto materialHardwareDto= new MaterialHardwareDto();
             try
             {
-                var materialHardware = await _genericRepo.GetById(id);
+                var materialHardware = await _genericRepo.Query().Include(x=>x.Supplier).FirstOrDefaultAsync();
                 materialHardware = _mapper.Map<MaterialHardware>(materialHardware);
             }
             catch (Exception ex) 

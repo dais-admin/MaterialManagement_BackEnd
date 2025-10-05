@@ -6,6 +6,7 @@ using DAIS.DataAccess.Interfaces;
 using DAIS.DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -170,7 +171,7 @@ namespace DAIS.CoreBusiness.Services
                 var existingWarranty = await _genericRepo.GetById(materialWarrantyDto.Id);
                 if (existingWarranty != null)
                 {
-                    if (existingWarranty.WarrantyDocument != null)
+                    if (!string.IsNullOrEmpty(materialWarrantyDto.WarrantyDocument))
                     {
                         existingWarranty.WarrantyDocument = materialWarrantyDto.WarrantyDocument;
 
