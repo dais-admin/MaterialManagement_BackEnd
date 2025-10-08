@@ -4,6 +4,7 @@ using DAIS.CoreBusiness.Constants;
 using DAIS.CoreBusiness.Dtos;
 using DAIS.CoreBusiness.Interfaces;
 using DAIS.DataAccess.Entities;
+using DAIS.DataAccess.Helpers;
 using DAIS.DataAccess.Interfaces;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
@@ -247,6 +248,7 @@ namespace DAIS.CoreBusiness.Services
                 //Add records in Material
                 bulkUploadResponse.Materials = AddMaterials(bulkUploadResponse.Materials, (Guid)bulkUploadDetail.Id);
                 bulkUploadResponse.BulkUploadDetails = bulkUploadDetail;
+                bulkUploadResponse.UploadedDate = DateTime.Now;
             }
             return bulkUploadResponse;               
         }
@@ -795,6 +797,8 @@ namespace DAIS.CoreBusiness.Services
                 string uploadedFilePath = folderPath + newFileName;
                 workbook.SaveToFile(uploadedFilePath, ExcelVersion.Version2016);
                 bulkUploadResponse.UploadedFile = newFileName;
+                bulkUploadResponse.UploadedDate = DateTime.Now;
+
                 // Dispose resources
                 workbook.Dispose();
             }
@@ -892,8 +896,10 @@ namespace DAIS.CoreBusiness.Services
                     
                     material.CreatedDate= DateTime.Now;
                     material.CreatedBy = userName;
+                    material.UpdatedDate = DateTime.Now;
                     material.IsDeleted = false;                   
                     material.BuilkUploadDetailId = fileBatchId;
+                   // material.CurrentApprovalStatus = ApprovalStatus.Submmitted.ToString();
                     var addedMaterial = _bulkUploadRepository.Add(material);
                     if (addedMaterial != null)
                     {
@@ -917,8 +923,13 @@ namespace DAIS.CoreBusiness.Services
                 FilePath = folderPath,
                 NoOfRecords = uploadedCount,
                 ChangedBy = userName,
-                ChangedDate = DateTime.UtcNow,
-               
+                //ApprovalStatus = ApprovalStatus.Submmitted.ToString(),
+                ChangedDate = TimeZoneInfo.ConvertTimeFromUtc(
+                            DateTime.UtcNow,
+                            TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"))
+
+
+
             };
             return _bulkUploadDetailService.AddBulkUploadDetail(bulkUploadDetailDto);           
         }

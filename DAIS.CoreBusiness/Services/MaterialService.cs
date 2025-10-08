@@ -65,6 +65,10 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var material = _materialServiceInfrastructure.Mapper.Map<Material>(materialDto);
+                material.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(
+                   DateTime.UtcNow,
+                   TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")
+               );
                 if (materialDto.YearOfInstallation != null)
                 {
                     material.MaterialStatus = MaterialStatus.InUse;
@@ -72,6 +76,7 @@ namespace DAIS.CoreBusiness.Services
                 
                 var dbEntity = await _materialServiceInfrastructure.GenericRepository.Add(material).ConfigureAwait(false);
                 materialDto.Id = dbEntity.Id;
+                materialDto.UpdatedDate = material.UpdatedDate;
 
             }
             catch (Exception ex)
