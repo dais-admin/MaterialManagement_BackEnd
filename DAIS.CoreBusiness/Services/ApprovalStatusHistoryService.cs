@@ -100,6 +100,17 @@ namespace DAIS.CoreBusiness.Services
                 }
 
                 await UpdateBulkUploadDetailsStatus(bulkApprovalInformationDto,actionRequiredByUserEmail);
+                var materialIds = await _materialRepo.Query()
+                 .Where(m => m.BuilkUploadDetailId != null
+                             && m.BuilkUploadDetailId == bulkApprovalInformationDto.BulkUploadDetailId)
+                 .Select(m => m.Id)
+                 .ToListAsync();
+
+                foreach (var materialId in materialIds)
+                {
+                    await UpdateMaterialCurrentApprovalStatus(materialId, bulkApprovalInformationDto.ApprovalStatus);
+                }
+
             }
             catch (Exception ex)
             {
@@ -161,8 +172,11 @@ namespace DAIS.CoreBusiness.Services
                     ApprovalStatusHistory = material.ApprovalStatusHistory.Select(history => new ApprovalStatusHistoryDto
                     {
                         StatusChangeBy = history.StatusChangeBy,
-                        StatusChangeDate = history.StatusChangeDate,
-                        ApprovalStatus = ApprovalStatusDescriptions.GetDescription(history.ApprovalStatus),
+                        StatusChangeDate  = TimeZoneInfo.ConvertTimeFromUtc(
+                            DateTime.UtcNow,
+                            TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")
+                        ),
+                       ApprovalStatus = ApprovalStatusDescriptions.GetDescription(history.ApprovalStatus),
                         Comments = history.Comments
                     }).ToList(),
                 });
@@ -209,7 +223,11 @@ namespace DAIS.CoreBusiness.Services
                     CurrentApprovalStatus = material.CurrentApprovalStatus,
                     WorkPackageId = material.WorkPackageId,
                     UpdatedBy = material.UpdatedBy,
-                    UpdatedDate = material.UpdatedDate,
+                   // UpdatedBy = material.CreatedBy,
+                    UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(
+                    DateTime.UtcNow,
+                    TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")
+                    ),
                     WorkPackage = new WorkPackageDto
                     {
                         Id = material.WorkPackage.Id,

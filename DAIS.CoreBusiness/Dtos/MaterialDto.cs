@@ -14,7 +14,7 @@ namespace DAIS.CoreBusiness.Dtos
         public string MaterialCode { get; set; }
         public int MaterialQty { get; set; }
         public string? LocationRFId { get; set; }
-        public DateTime PurchaseDate { get; set; }
+        public DateTime? PurchaseDate { get; set; }
         public DateTime? CommissioningDate { get; set; }
         public DateTime? YearOfInstallation { get; set; }
         public DateTime? DesignLifeDate { get; set; }
