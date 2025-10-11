@@ -240,7 +240,7 @@ namespace DAIS.CoreBusiness.Services
                     var voucherTrancationApproval = new MaterialVoucherTransactionApproval()
                     {
                         MaterialIssueRecieveVoucherId = issueRecieveVoucher.Id,
-                        ApprovalStatus = materialTransferApprovalDto.ApprovalStatus,
+                        ApprovalStatus = (ApprovalStatus)Enum.Parse(typeof(ApprovalStatus), materialTransferApprovalDto.ApprovalStatus),
                         IssuerId = materialTransferApprovalDto.CurrentUserId,
                         RecieverId = materialTransferApprovalDto.ReviewerApproverId,
                         CreatedDate = DateTime.UtcNow,
