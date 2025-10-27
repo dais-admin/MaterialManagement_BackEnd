@@ -38,7 +38,7 @@ namespace DAIS.API.Controllers
         {
             var listDesignlDocument = await _designDocumentService.GetAllDesignlDocumentAsync();
             return Ok(listDesignlDocument);
-        }
+        }  
         [HttpGet("GetDesignDocumentById")]
         public async Task<IActionResult> GetDesignDocumentByIdAsync(Guid Id)
         {

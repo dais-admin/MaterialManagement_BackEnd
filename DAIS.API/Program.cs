@@ -7,6 +7,7 @@ using Dias.ExcelSteam.Connection;
 using Dias.ExcelSteam.Extensions;
 using DocumentFormat.OpenXml.AdditionalCharacteristics;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.AspNetCore.Http.Features;
 using Serilog;
 
 internal class Program
@@ -42,6 +43,17 @@ internal class Program
         builder.Services.AddHostedService<CpuUsageMonitoringService>();
         builder.Services.AddHostedService<AppDataBackupService>();
         builder.Services.AddHostedService<AppFileBackupService>();
+
+        // Allow large uploads (3 GB = 3 * 1024 * 1024 * 1024 bytes)
+        builder.WebHost.ConfigureKestrel(serverOptions =>
+        {
+            serverOptions.Limits.MaxRequestBodySize = 3L * 1024 * 1024 * 1024; // 3 GB
+        });
+
+        builder.Services.Configure<FormOptions>(options =>
+        {
+            options.MultipartBodyLengthLimit = 3L * 1024 * 1024 * 1024; // 3 GB
+        });
 
         var app = builder.Build();
 
