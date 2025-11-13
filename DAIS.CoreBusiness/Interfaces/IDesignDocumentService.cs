@@ -9,7 +9,7 @@ namespace DAIS.CoreBusiness.Interfaces
         Task DeleteDesignDocumentAsync(Guid Id);
         Task<DesignDocumentDto> GetDesignDocumentByIdAsync(Guid Id);
         Task<List<DesignDocumentDto>> GetAllDesignlDocumentAsync();
-
+        Task<List<DesignDocumentDto>> GetAllDesignlDocumentsByProjectWorkpackageAsync(Guid projectId, Guid? workPackageId);
         DesignDocumentDto GetDesignDocumentIdByName(string name);
     }
 }

@@ -90,6 +90,36 @@ namespace DAIS.CoreBusiness.Services
             return DesignDocumentDtosList;
         }
 
+        public async Task<List<DesignDocumentDto>> GetAllDesignlDocumentsByProjectWorkpackageAsync(Guid projectId,Guid ?workPackageId)
+        {
+
+            _logger.LogInformation("designDocumentService:GetAlldesignDocument:Method Start");
+            List<DesignDocumentDto> DesignDocumentDtosList = new List<DesignDocumentDto>();
+            try
+            {
+                var designDocumentList = await _genericRepo.Query() 
+                        . Where(x=>x.WorkPackageId== workPackageId)
+                            .Include(x => x.WorkPackage)
+                            .ThenInclude(x=>x.Project)
+                            .ToListAsync();
+                
+                
+                foreach (var designDocument in designDocumentList)
+                {
+                    var designDocumentDto = _mapper.Map<DesignDocumentDto>(designDocument);
+                    DesignDocumentDtosList.Add(designDocumentDto);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                throw ex;
+            }
+            _logger.LogInformation("designDocumentService: GetAlldesignDocument:Method End");
+            return DesignDocumentDtosList;
+        }
+
         public async Task<DesignDocumentDto> UpdateDesignDocumentAsync(DesignDocumentDto designDocumentDto)
         {
             _logger.LogInformation("DesignDocumentService: UpdateDesignDocument:Method Start");
