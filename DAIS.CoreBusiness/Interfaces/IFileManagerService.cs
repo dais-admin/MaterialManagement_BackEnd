@@ -6,5 +6,7 @@ namespace DAIS.CoreBusiness.Interfaces
     {
         Task<(bool, string)> UploadAndEncryptFile(IFormFile file, string path);
         Task<(Stream, bool)> GetEncryptedFile(string fileName);
+        void Delete(string relativeFilePath);
+
     }
 }

@@ -1,14 +1,9 @@
-﻿
-using AutoMapper;
-using DAIS.CoreBusiness.Constants;
+﻿using DAIS.CoreBusiness.Constants;
 using DAIS.CoreBusiness.Dtos;
 using DAIS.CoreBusiness.Dtos.Reports;
 using DAIS.CoreBusiness.Interfaces;
 using DAIS.DataAccess.Entities;
 using DAIS.DataAccess.Helpers;
-using DAIS.DataAccess.Interfaces;
-using DocumentFormat.OpenXml.Office2010.Excel;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
@@ -20,14 +15,16 @@ namespace DAIS.CoreBusiness.Services
     {
         private readonly MaterialServiceDependencies _materialServiceDependencies;
         private readonly MaterialServiceInfrastructure _materialServiceInfrastructure;
+        private readonly IFileManagerService _fileManager;
 
         private string userName = string.Empty;
         private Guid projectId = Guid.Empty;
         private string roleName = string.Empty;
-        public MaterialService(MaterialServiceDependencies materialServiceDependencies, MaterialServiceInfrastructure materialServiceInfrastructure)
+        public MaterialService(MaterialServiceDependencies materialServiceDependencies, MaterialServiceInfrastructure materialServiceInfrastructure, IFileManagerService fileManager)
         {
             _materialServiceDependencies = materialServiceDependencies;
             _materialServiceInfrastructure = materialServiceInfrastructure;
+            _fileManager = fileManager;
 
             if (_materialServiceInfrastructure.HttpContextAccessor.HttpContext != null)
             {
@@ -91,19 +88,55 @@ namespace DAIS.CoreBusiness.Services
         public async Task DeleteMaterialAsync(Guid id)
         {
             _materialServiceInfrastructure.Logger.LogInformation("MaterialService:DeleteMaterialAsync:Method Start");
+
             try
             {
-                var materialToRemove = await _materialServiceInfrastructure.GenericRepository.GetById(id).ConfigureAwait(false); 
-              await  _materialServiceInfrastructure.GenericRepository.Remove(materialToRemove).ConfigureAwait(false);
+                // Get material
+                var material = await _materialServiceInfrastructure.GenericRepository
+                    .GetById(id)
+                    .ConfigureAwait(false);
+
+                if (material == null)
+                {
+                    _materialServiceInfrastructure.Logger.LogWarning($"Material with id {id} not found.");
+                    return;
+                }
+
+                // Delete associated files (if any)
+                if (!string.IsNullOrWhiteSpace(material.MaterialImage))
+                {
+                    var files = material.MaterialImage
+                                .Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var filePath in files)
+                    {
+                        try
+                        {
+                            _fileManager.Delete(filePath);   // delete file or folder
+                            _materialServiceInfrastructure.Logger.LogInformation($"Deleted file: {filePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _materialServiceInfrastructure.Logger.LogWarning(ex, $"Failed to delete file: {filePath}");
+                        }
+                    }
+                }
+
+                // Remove material from DB
+                await _materialServiceInfrastructure.GenericRepository
+                    .Remove(material!)
+                    .ConfigureAwait(false);
+
+                _materialServiceInfrastructure.Logger.LogInformation("MaterialService:DeleteMaterialAsync:Method End");
             }
             catch (Exception ex)
             {
-                _materialServiceInfrastructure.Logger.LogError(ex.Message, ex);
-                throw ex;
-
+                _materialServiceInfrastructure.Logger.LogError(ex, "Error in DeleteMaterialAsync");
+                throw;
             }
-            _materialServiceInfrastructure.Logger.LogInformation("MaterialService:DeleteMaterialAsync:Method End");
         }
+
+
         public async Task DeleteBulkUploadMaterials(Guid bulkUploadDetailId)
         {
             _materialServiceInfrastructure.Logger.LogInformation("MaterialService:DeleteBulkUploadMaterials:Method Start");

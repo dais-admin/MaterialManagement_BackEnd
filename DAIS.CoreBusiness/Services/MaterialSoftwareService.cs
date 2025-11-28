@@ -18,11 +18,13 @@ namespace DAIS.CoreBusiness.Services
         private IGenericRepository<MaterialSoftware> _genericRepo;
         private readonly IMapper _mapper;
         private readonly ILogger<MaterialSoftwareService> _logger;
-        public MaterialSoftwareService(IGenericRepository<MaterialSoftware> genericRepo, IMapper mapper, ILogger<MaterialSoftwareService> logger) 
+        private readonly IFileManagerService _fileManager;
+        public MaterialSoftwareService(IGenericRepository<MaterialSoftware> genericRepo, IMapper mapper, ILogger<MaterialSoftwareService> logger , IFileManagerService fileManager) 
         { 
             _genericRepo = genericRepo;
             _mapper = mapper;
             _logger = logger;
+            _fileManager = fileManager;
         
         }
 
@@ -44,23 +46,52 @@ namespace DAIS.CoreBusiness.Services
             return materialSoftwareDto;
         }
 
-        public async Task DeleteMaterialSoftwareAsync(Guid Id)
+        public async Task DeleteMaterialSoftwareAsync(Guid id)
         {
-            _logger.LogInformation("MaterialHardwareService: DeleteMaterialSoftwareAsync:Method End");
+            _logger.LogInformation("MaterialSoftwareService:DeleteMaterialSoftwareAsync:Method Start");
+
             try
             {
-                var materialSoftware = await _genericRepo.GetById(Id);
-                
+                var materialSoftware = await _genericRepo.GetById(id);
+
+                if (materialSoftware == null)
+                {
+                    _logger.LogWarning($"MaterialSoftware with id {id} not found.");
+                    return;
+                }
+
+                // Delete attached files/folders
+                if (!string.IsNullOrWhiteSpace(materialSoftware.SoftwareDocument))
+                {
+                    var files = materialSoftware.SoftwareDocument
+                                .Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var filePath in files)
+                    {
+                        try
+                        {
+                            _fileManager.Delete(filePath);     // FileManager deletes file + folder
+                            _logger.LogInformation($"Deleted file: {filePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, $"Failed to delete file: {filePath}");
+                        }
+                    }
+                }
+
+                // Remove record from DB
                 await _genericRepo.Remove(materialSoftware);
+
+                _logger.LogInformation("MaterialSoftwareService:DeleteMaterialSoftwareAsync:Method End");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, ex);
-                throw ex;
-
+                _logger.LogError(ex, "Error in DeleteMaterialSoftwareAsync");
+                throw;
             }
-            _logger.LogInformation("MaterialSoftwareService:DeleteMaterialHardwareAsync:Method End");
         }
+
 
         public async Task<List<MaterialSoftwareDto>> GetAllMaterialSoftware()
         {

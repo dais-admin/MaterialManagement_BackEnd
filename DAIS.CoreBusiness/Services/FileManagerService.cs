@@ -63,6 +63,29 @@ namespace DAIS.CoreBusiness.Services
             return (isSuccess, uploadedFilePath.ToString());
         }
 
+        public void Delete(string relativeFilePath)
+        {
+            try
+            {
+                string fullPath = Path.Combine(_rootFolder, relativeFilePath);
+                if (File.Exists(fullPath))
+                {
+                    File.Delete(fullPath);
+                    _logger.LogInformation($"Deleted file: {fullPath}");
+                }
+                else
+                {
+                    _logger.LogWarning($"File not found: {fullPath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Failed to delete file: {relativeFilePath}");
+                throw;
+            }
+        }
+
+
         public async Task<(bool, string)> UploadAndEncryptFile(IFormFile file, string path)
         {
             bool isSuccess = true;

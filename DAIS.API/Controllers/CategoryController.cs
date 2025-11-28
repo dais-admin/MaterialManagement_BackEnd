@@ -29,6 +29,12 @@ namespace DAIS.API.Controllers
             var listCategory=await _categoryService.GetCategoryTypeById(id);
             return Ok(listCategory);
         }
+        [HttpGet("GetCategoriesByMaterialType")]
+        public async Task<IActionResult> GetCategoriesByMaterialType(Guid typeId)
+        {
+            var categories = await _categoryService.GetCategoriesByMaterialType(typeId);
+            return Ok(categories);
+        }
         [HttpPost]
         public async Task<IActionResult> AddCategory(CategoryDto categoryDto)
         {

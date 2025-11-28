@@ -1,4 +1,5 @@
 ﻿using DAIS.CoreBusiness.Dtos;
+using DAIS.CoreBusiness.Helpers;
 
 namespace DAIS.CoreBusiness.Interfaces
 {
@@ -8,7 +9,7 @@ namespace DAIS.CoreBusiness.Interfaces
         Task<MaterialServiceProviderDto> AddServiceProviderAsync(MaterialServiceProviderDto serviceProviderDto);
         Task<MaterialServiceProviderDto> UpdateServiceProviderAsync(MaterialServiceProviderDto serviceProviderDto);
         Task DeleteServiceProviderAsync(Guid id);
-        Task<List<MaterialServiceProviderDto>> GetAllServiceProviderAsync();
+        Task<PagedResult<MaterialServiceProviderDto>> GetAllServiceProviderAsync(int pageNumber, int pageSize);
 
     }
 } 

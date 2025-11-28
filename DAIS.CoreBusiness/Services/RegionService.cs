@@ -6,10 +6,11 @@ using DAIS.DataAccess.Entities;
 using DAIS.DataAccess.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using DAIS.CoreBusiness.Helpers;
 
 namespace DAIS.CoreBusiness.Services
 {
-    public class RegionService:IRegionService
+    public class RegionService : IRegionService
     {
         private IGenericRepository<Region> _genericRepo;
         private readonly IMapper _mapper;
@@ -29,16 +30,16 @@ namespace DAIS.CoreBusiness.Services
             {
                 var region = await _genericRepo.GetById(id);
                 regionDto = _mapper.Map<RegionDto>(region);
-             
+
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
                 throw ex;
             }
             _logger.LogInformation("RegionService:GetRegionById:Method End");
             return regionDto;
-                
+
         }
 
         public async Task<RegionDto> AddRegion(RegionDto regionDto)
@@ -52,9 +53,9 @@ namespace DAIS.CoreBusiness.Services
                 }
                 var region = _mapper.Map<Region>(regionDto);
                 await _genericRepo.Add(region);
-                
+
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
                 throw ex;
@@ -64,18 +65,18 @@ namespace DAIS.CoreBusiness.Services
         }
 
         public async Task<RegionDto> UpdateRegion(RegionDto regionDto)
-        { 
+        {
 
-              _logger.LogInformation("RegionService:UpdateRegion:Method Start");
+            _logger.LogInformation("RegionService:UpdateRegion:Method Start");
 
             try
             {
                 var region = _mapper?.Map<Region>(regionDto);
-                 await _genericRepo.Update(region);
-               
+                await _genericRepo.Update(region);
+
 
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
                 throw ex;
@@ -93,7 +94,7 @@ namespace DAIS.CoreBusiness.Services
                 var region = await _genericRepo.GetById(id);
                 await _genericRepo.Remove(region);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
                 throw ex;
@@ -101,7 +102,7 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("RegionService:DeleteRegion:Method End");
         }
 
-       public async Task<List<RegionDto>> GetAllRegions()
+        public async Task<List<RegionDto>> GetAllRegions()
         {
             _logger.LogInformation("RegionService:GetAllRegions:Method Start");
             List<RegionDto> regionDtoList = new List<RegionDto>();
@@ -111,14 +112,13 @@ namespace DAIS.CoreBusiness.Services
 
                 foreach (var region in regionsList)
                 {
-                    
-                    var regionDto=_mapper.Map<RegionDto>(region);
+
+                    var regionDto = _mapper.Map<RegionDto>(region);
                     regionDtoList.Add(regionDto);
 
                 }
-                
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
                 throw ex;
@@ -128,6 +128,8 @@ namespace DAIS.CoreBusiness.Services
 
         }
 
+
+
         public RegionDto GetRegionIdByName(string name)
         {
             _logger.LogInformation("RegionService:GetRegionIdByName:Method Start");
@@ -135,7 +137,7 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var region = _genericRepo.Query()
-                    .FirstOrDefault(x=>x.RegionName.ToLower() == name.ToLower());
+                    .FirstOrDefault(x => x.RegionName.ToLower() == name.ToLower());
                 regionDto = _mapper.Map<RegionDto>(region);
 
             }
@@ -147,5 +149,6 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("RegionService:GetRegionIdByName:Method End");
             return regionDto;
         }
+       
     }
 }

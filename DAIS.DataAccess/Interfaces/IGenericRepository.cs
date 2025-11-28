@@ -17,5 +17,6 @@ namespace DAIS.DataAccess.Interfaces
         Task<T> FindAsync(int id);
         Task<IQueryable<T>> Query(string columnName, Guid id);
         Task<List<T>> GetMasterRecordCountsAsync(string storedProcedure);
+        IQueryable<T> GetAllAsQueryable();
     }
 }

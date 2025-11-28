@@ -10,5 +10,6 @@ namespace DAIS.CoreBusiness.Interfaces
         Task DeleteCategory(Guid id);
         Task<List<CategoryDto>> GetAllCategory();
         CategoryDto GetCategoryIdByName(string name);
+        Task<IEnumerable<CategoryDto>> GetCategoriesByMaterialType(Guid typeId);
     }
 }

@@ -3,14 +3,8 @@ using DAIS.CoreBusiness.Dtos;
 using DAIS.CoreBusiness.Interfaces;
 using DAIS.DataAccess.Entities;
 using DAIS.DataAccess.Interfaces;
-using DAIS.DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DAIS.CoreBusiness.Services
 {
@@ -19,11 +13,13 @@ namespace DAIS.CoreBusiness.Services
         private IGenericRepository<MaterialHardware> _genericRepo;
         private readonly IMapper _mapper;
         private readonly ILogger<MaterialHardwareService> _logger;
-        public MaterialHardwareService(IGenericRepository<MaterialHardware> genericRepo,IMapper mapper, ILogger<MaterialHardwareService> logger) 
+        private readonly IFileManagerService _fileManager;
+        public MaterialHardwareService(IGenericRepository<MaterialHardware> genericRepo,IMapper mapper, ILogger<MaterialHardwareService> logger , IFileManagerService fileManager) 
         {
             _genericRepo = genericRepo;
             _mapper = mapper;
             _logger = logger;
+            _fileManager = fileManager;
         
         }
         public  async Task<MaterialHardwareDto> AddMaterialHardwareAsync(MaterialHardwareDto materialHardwareDto)
@@ -143,21 +139,51 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("MaterialHardwareService:GetAllMaterialHardware:Method End");
             return materialHardwareDtosList;
         }
-        public async Task DeleteMaterialHardwareAsync(Guid Id)
+        public async Task DeleteMaterialHardwareAsync(Guid id)
         {
-             _logger.LogInformation("MaterialHardwareService:DeleteMaterialHardwareAsync:Method End");
+            _logger.LogInformation("MaterialHardwareService:DeleteMaterialHardwareAsync:Method Start");
+
             try
             {
-                var materialHardware = await _genericRepo.GetById(Id);
-                await _genericRepo.Remove(materialHardware);
-            }
-            catch (Exception ex) 
-            {
-                _logger.LogError(ex.Message, ex);
-                throw ex;
+                var materialHardware = await _genericRepo.GetById(id);
 
+                if (materialHardware == null)
+                {
+                    _logger.LogWarning($"MaterialHardware with id {id} not found.");
+                    return;
+                }
+
+                // Delete associated files if exist
+                if (!string.IsNullOrWhiteSpace(materialHardware.HardwareDocument))
+                {
+                    var files = materialHardware.HardwareDocument
+                                .Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var filePath in files)
+                    {
+                        try
+                        {
+                            _fileManager.Delete(filePath);   // FileManager handles folder+file delete
+                            _logger.LogInformation($"Deleted file: {filePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, $"Failed to delete file: {filePath}");
+                        }
+                    }
+                }
+
+                // Remove DB entry
+                await _genericRepo.Remove(materialHardware);
+
+                _logger.LogInformation("MaterialHardwareService:DeleteMaterialHardwareAsync:Method End");
             }
-            _logger.LogInformation("MaterialHardwareService:DeleteMaterialHardwareAsync:Method End");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteMaterialHardwareAsync");
+                throw;
+            }
         }
+
     }
 }
