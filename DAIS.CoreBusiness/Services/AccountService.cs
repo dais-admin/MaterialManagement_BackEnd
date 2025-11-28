@@ -155,10 +155,19 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var user=await GetUserByEmail(userEmail);
-                string newPassword = GeneratePassword();
-                
-                await _userManager.ChangePasswordAsync(user,user.PasswordHash,newPassword);
-                if(user!=null)
+                string newPassword = GenerateSecurePassword();
+
+                // Remove old password
+                var removeResult = await _userManager.RemovePasswordAsync(user);
+                if (!removeResult.Succeeded)
+                    return false;
+
+                // Add new password
+                var addResult = await _userManager.AddPasswordAsync(user, newPassword);
+                if (!addResult.Succeeded)
+                    return false;
+
+                if (user!=null)
                 {
                     MailData mailData = new MailData()
                     {
@@ -267,13 +276,7 @@ namespace DAIS.CoreBusiness.Services
             return isValid;
         }
 
-        private string GeneratePassword()
-        {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$!";
-            var random = new Random();
-            return new string(Enumerable.Repeat(chars,8).Select(s => s[random.Next(s.Length)]).ToArray());
-        }
-
+       
         public async Task<bool> ChangePassword(ChangePasswordDto changePasswordDto)
         {
             
@@ -294,6 +297,20 @@ namespace DAIS.CoreBusiness.Services
                 _logger.LogInformation("AccountService:ChangePassword:Method End");
                 return true;
             }
+
+        public string GenerateSecurePassword()
+        {
+            const string validChars = "ABCDEFGHJKLMNOPQRSTUVWXYZ" +
+                                      "abcdefghijkmnopqrstuvwxyz" +
+                                      "0123456789" +
+                                      "!@$?_-";
+
+            var random = new Random();
+            return new string(Enumerable.Repeat(validChars, 12)
+                .Select(chars => chars[random.Next(chars.Length)]).ToArray());
         }
     }
+
+    
+}
 

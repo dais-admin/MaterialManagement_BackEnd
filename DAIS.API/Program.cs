@@ -41,8 +41,8 @@ internal class Program
         });
 
         builder.Services.AddHostedService<CpuUsageMonitoringService>();
-        builder.Services.AddHostedService<AppDataBackupService>();
-        builder.Services.AddHostedService<AppFileBackupService>();
+        //builder.Services.AddHostedService<AppDataBackupService>();
+        //builder.Services.AddHostedService<AppFileBackupService>();
 
         // Allow large uploads (3 GB = 3 * 1024 * 1024 * 1024 bytes)
         builder.WebHost.ConfigureKestrel(serverOptions =>
