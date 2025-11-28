@@ -25,12 +25,13 @@ namespace DAIS.API.Controllers
             _fileManagerService = fileManagerService;
 
         }
-        [HttpGet("GetAllMaterialServiceProvides")]
-        public async Task<IActionResult> GetAllMaterialServiceProvides()
+        [HttpGet("GetAllServiceProviders")]
+        public async Task<IActionResult> GetAllServiceProviders(int pageNumber = 1, int pageSize = 10)
         {
-            var listMaterialService = await _materialServiceProvider.GetAllServiceProviderAsync();
-            return Ok(listMaterialService);
+            var result = await _materialServiceProvider.GetAllServiceProviderAsync(pageNumber, pageSize);
+            return Ok(result);
         }
+
         [HttpGet("GetMaterialServiceProviderById")]
         public async Task<IActionResult> GetMaterialServiceProviderById(Guid id)
         {

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DAIS.CoreBusiness.Dtos;
+using DAIS.CoreBusiness.Helpers;
 using DAIS.CoreBusiness.Interfaces;
 using DAIS.DataAccess.Entities;
 using DAIS.DataAccess.Interfaces;
@@ -13,13 +14,15 @@ namespace DAIS.CoreBusiness.Services
         private IGenericRepository<MaterialServiceProvider> _genericRepo;
         private readonly IMapper _mapper;
         private readonly ILogger<MaterialServiceProviderService> _logger;
+        private readonly string _rootFolder = string.Empty;
+        private readonly IFileManagerService _fileManager;
 
-        public MaterialServiceProviderService(IGenericRepository<MaterialServiceProvider> genericRepo, IMapper mapper, ILogger<MaterialServiceProviderService> logger)
+        public MaterialServiceProviderService(IGenericRepository<MaterialServiceProvider> genericRepo,  IMapper mapper, ILogger<MaterialServiceProviderService> logger, IFileManagerService fileManager)
         {
             _genericRepo = genericRepo;
             _mapper = mapper;
             _logger = logger;
-            
+            _fileManager = fileManager;
         }
         public  async Task<MaterialServiceProviderDto> AddServiceProviderAsync(MaterialServiceProviderDto serviceProviderDto)
         {
@@ -47,42 +50,79 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("MaterialServiceProvider:DeleteServiceProviderAsync:Method Start");
             try
             {
-                var serviceprovider = await _genericRepo.GetById(id);
-                await _genericRepo.Remove(serviceprovider);
-            }
-            catch (Exception ex) 
-            {
-                _logger.LogError(ex.Message, ex);
-                throw ex;
-            }
-            _logger.LogInformation("MaterialServiceProvider:DeleteServiceProviderAsync:Method End");
+                var serviceProvider = await _genericRepo.GetById(id);
+                if (serviceProvider == null)
+                {
+                    _logger.LogWarning($"ServiceProvider with id {id} not found.");
+                    return;
+                }
 
+                if (!string.IsNullOrWhiteSpace(serviceProvider.ServiceProviderDocument))
+                {
+                    var files = serviceProvider.ServiceProviderDocument
+                                .Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var filePath in files)
+                    {
+                        try
+                        {
+                            _fileManager.Delete(filePath);  // Let FileManagerService handle path
+                            _logger.LogInformation($"Deleted file: {filePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, $"Failed to delete file: {filePath}");
+                        }
+                    }
+                }
+
+                await _genericRepo.Remove(serviceProvider);
+
+                _logger.LogInformation("MaterialServiceProvider:DeleteServiceProviderAsync:Method End");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteServiceProviderAsync");
+                throw;
+            }
         }
 
-        public async Task<List<MaterialServiceProviderDto>> GetAllServiceProviderAsync()
+
+        public async Task<PagedResult<MaterialServiceProviderDto>> GetAllServiceProviderAsync(
+     int pageNumber, int pageSize)
         {
             _logger.LogInformation("MaterialServiceProvider:GetAllServiceProviderAsync:Method Start");
-            List<MaterialServiceProviderDto> materialServiceProviderDtoList= new List<MaterialServiceProviderDto>();
+
             try
             {
-                
-                var serviceProviderList = await _genericRepo.Query()
-                    .Include(x=>x.Contractor)
-                     .Include(x => x.Manufacturer).ToListAsync().ConfigureAwait(false);
-                materialServiceProviderDtoList.AddRange(_mapper.Map<List<MaterialServiceProviderDto>>(serviceProviderList));    
-               
+                var query = _genericRepo.Query()
+                    .Include(x => x.Contractor)
+                    .Include(x => x.Manufacturer)
+                    .AsQueryable();
 
+                var totalRecords = await query.CountAsync();
 
+                var pagedData = await query
+                    .OrderBy(x => x.ServiceProviderName) // change based on your field
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var dtoData = _mapper.Map<List<MaterialServiceProviderDto>>(pagedData);
+
+                return new PagedResult<MaterialServiceProviderDto>
+                {
+                    TotalCount = totalRecords,
+                    Data = dtoData
+                };
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
-                throw ex;
+                throw;
             }
-            _logger.LogInformation("MaterialServiceProvider:GetAllServiceProviderAsync:Method End"); ;
-            return materialServiceProviderDtoList;
-
         }
+
 
         public async Task<MaterialServiceProviderDto> GetServiceProviderByIdAsync(Guid id)
         {

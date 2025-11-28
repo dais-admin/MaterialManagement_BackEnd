@@ -62,7 +62,10 @@ namespace DAIS.DataAccess.Repositories
         {
             return await _dbSet.ToListAsync();
         }
-
+        public IQueryable<T> GetAllAsQueryable()
+        {
+            return _context.Set<T>().AsNoTracking().AsQueryable();
+        }
         public async Task<IEnumerable<T>> GetWhere(Expression<Func<T, bool>> predicate)
         {
             return await _dbSet.Where(predicate).ToListAsync();

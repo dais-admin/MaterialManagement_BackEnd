@@ -19,12 +19,13 @@ namespace DAIS.CoreBusiness.Services
         private IGenericRepository<Supplier> _genericRepo;
         private readonly IMapper _mapper;
         private readonly ILogger<SupplierService> _logger;
-        public SupplierService(IGenericRepository<Supplier> genericRepo, IMapper mapper, ILogger<SupplierService> logger)
+        private readonly IFileManagerService _fileManager;
+        public SupplierService(IGenericRepository<Supplier> genericRepo, IMapper mapper, ILogger<SupplierService> logger, IFileManagerService fileManager)
         {
             _genericRepo = genericRepo;
             _mapper = mapper;
             _logger = logger;
-            
+            _fileManager = fileManager;
         }
         public async Task<SupplierDto> AddSupplier(SupplierDto supplierDto)
         {
@@ -51,18 +52,49 @@ namespace DAIS.CoreBusiness.Services
         public async Task DeleteSupplier(Guid id)
         {
             _logger.LogInformation("SupplierService:DeleteSupplier:Method Start");
+
             try
             {
                 var supplier = await _genericRepo.GetById(id);
+
+                if (supplier == null)
+                {
+                    _logger.LogWarning($"Supplier with id {id} not found.");
+                    return;
+                }
+
+                // Delete associated files/folders if any
+                if (!string.IsNullOrWhiteSpace(supplier.SupplierDocument))
+                {
+                    var files = supplier.SupplierDocument
+                                .Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var filePath in files)
+                    {
+                        try
+                        {
+                            _fileManager.Delete(filePath);  // Use your FileManager service
+                            _logger.LogInformation($"Deleted file: {filePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, $"Failed to delete file: {filePath}");
+                        }
+                    }
+                }
+
+                // Remove DB entry
                 await _genericRepo.Remove(supplier);
+
+                _logger.LogInformation("SupplierService:DeleteSupplier:Method End");
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
-                _logger.LogError(ex.Message, ex);
-                throw ex;
+                _logger.LogError(ex, "Error in DeleteSupplier");
+                throw;
             }
-            _logger.LogInformation("SupplierService:DeleteSupplier:Method End");
         }
+
 
         public async Task<List<SupplierDto>> GetAllSupplier()
         {

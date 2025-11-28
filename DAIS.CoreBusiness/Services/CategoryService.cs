@@ -116,6 +116,8 @@ namespace DAIS.CoreBusiness.Services
         }
 
 
+
+
         public async Task<CategoryDto> UpdateCategory(CategoryDto categoryDto)
         {
             _logger.LogInformation("CategoryService:UpdateCategory:Method Start");
@@ -154,5 +156,19 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("CategoryService:GetCategoryIdByName:Method End");
             return categoryDto;
         }
+
+        public async Task<IEnumerable<CategoryDto>> GetCategoriesByMaterialType(Guid typeId)
+        {
+            return await _genericRepo.Query()
+                .Where(x => x.MaterialTypeId == typeId) // use the correct property from Category entity
+                .Select(x => new CategoryDto
+                {
+                    Id = x.Id,
+                    CategoryName = x.CategoryName,
+                    MaterialTypeId = x.MaterialTypeId
+                })
+                .ToListAsync();
+        }
+
     }
 }

@@ -18,11 +18,13 @@ namespace DAIS.CoreBusiness.Services
         private IGenericRepository<Manufacturer> _genericRepo;
         private readonly IMapper _mapper;
         private readonly ILogger<ManufacturerService> _logger;
-        public ManufacturerService(IGenericRepository<Manufacturer> genericRepo, IMapper mapper, ILogger<ManufacturerService> logger)
+        private readonly IFileManagerService _fileManager;
+        public ManufacturerService(IGenericRepository<Manufacturer> genericRepo, IMapper mapper, ILogger<ManufacturerService> logger , IFileManagerService fileManager)
         {
             _genericRepo = genericRepo;
             _mapper = mapper;
             _logger = logger;
+            _fileManager = fileManager;
         }
 
         public async Task<ManufacturerDto> GetManufacturer(Guid id)
@@ -100,23 +102,54 @@ namespace DAIS.CoreBusiness.Services
             _logger.LogInformation("ManufacturerService:UpdateManufactuter:Method  End");
             return manufacturerDto;
         }
-    
+
 
         public async Task DeleteManufacturer(Guid id)
         {
             _logger.LogInformation("ManufacturerService:DeleteManufacturer:Method Start");
+
             try
             {
                 var manufacturer = await _genericRepo.GetById(id);
+
+                if (manufacturer == null)
+                {
+                    _logger.LogWarning($"Manufacturer with id {id} not found.");
+                    return;
+                }
+
+                // Assuming this field contains the file paths
+                if (!string.IsNullOrWhiteSpace(manufacturer.ManufacturerDocument))
+                {
+                    var files = manufacturer.ManufacturerDocument
+                                .Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var filePath in files)
+                    {
+                        try
+                        {
+                            _fileManager.Delete(filePath);  // Use your FileManagerService
+                            _logger.LogInformation($"Deleted file: {filePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, $"Failed to delete file: {filePath}");
+                        }
+                    }
+                }
+
+                // Delete database record
                 await _genericRepo.Remove(manufacturer);
+
+                _logger.LogInformation("ManufacturerService:DeleteManufacturer:Method End");
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
-                _logger.LogError(ex.Message, ex);
-                throw ex;
+                _logger.LogError(ex, "Error in DeleteManufacturer");
+                throw;
             }
-            _logger.LogInformation("ManufacturerService:DeleteManufacturer:Method End");
         }
+
 
         public async  Task<List<ManufacturerDto>> GetAllManufacturer()
         {

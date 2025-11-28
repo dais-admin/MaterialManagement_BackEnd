@@ -13,13 +13,14 @@ namespace DAIS.CoreBusiness.Services
         private IGenericRepository<DesignDocument> _genericRepo;
         private readonly IMapper _mapper;
         private readonly ILogger<DesignDocumentService> _logger;
+        private readonly IFileManagerService _fileManager;
 
-        public DesignDocumentService(IGenericRepository<DesignDocument> genericRepo, IMapper mapper, ILogger<DesignDocumentService> logger)
+        public DesignDocumentService(IGenericRepository<DesignDocument> genericRepo, IMapper mapper, ILogger<DesignDocumentService> logger, IFileManagerService fileManager)
         {
             _genericRepo = genericRepo;
             _mapper = mapper;
             _logger = logger;
-
+            _fileManager = fileManager;
         }
 
         public async Task<DesignDocumentDto> AddDesignDocumentAsync(DesignDocumentDto designDocumentDto)
@@ -45,23 +46,52 @@ namespace DAIS.CoreBusiness.Services
             return designDocumentDto;
         }
 
-        public async Task DeleteDesignDocumentAsync(Guid Id)
+        public async Task DeleteDesignDocumentAsync(Guid id)
         {
-            _logger.LogInformation("DesignDocumentService: DeleteDesignDocumentAsync:Method End");
+            _logger.LogInformation("DesignDocumentService:DeleteDesignDocumentAsync:Method Start");
+
             try
             {
-                var designDocument = await _genericRepo.GetById(Id);
+                var designDocument = await _genericRepo.GetById(id);
 
+                if (designDocument == null)
+                {
+                    _logger.LogWarning($"DesignDocument with id {id} not found.");
+                    return;
+                }
+
+                // Delete associated files/folders
+                if (!string.IsNullOrWhiteSpace(designDocument.DocumentFileName))
+                {
+                    var files = designDocument.DocumentFileName
+                                .Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var filePath in files)
+                    {
+                        try
+                        {
+                            _fileManager.Delete(filePath);   // FileManager handles directory + file delete
+                            _logger.LogInformation($"Deleted file: {filePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, $"Failed to delete file: {filePath}");
+                        }
+                    }
+                }
+
+                // Delete DB entry
                 await _genericRepo.Remove(designDocument);
+
+                _logger.LogInformation("DesignDocumentService:DeleteDesignDocumentAsync:Method End");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, ex);
-                throw ex;
-
+                _logger.LogError(ex, "Error in DeleteDesignDocumentAsync");
+                throw;
             }
-            _logger.LogInformation("DesignDocumentService:DeleteDesignDocumentAsync:Method End");
         }
+
 
         public async Task<List<DesignDocumentDto>> GetAllDesignlDocumentAsync()
         {

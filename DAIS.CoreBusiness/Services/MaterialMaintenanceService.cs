@@ -1,17 +1,10 @@
-﻿using Aspose.Cells;
-using AutoMapper;
+﻿using AutoMapper;
 using DAIS.CoreBusiness.Dtos;
 using DAIS.CoreBusiness.Interfaces;
 using DAIS.DataAccess.Entities;
 using DAIS.DataAccess.Interfaces;
-using DAIS.DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DAIS.CoreBusiness.Services
 {
@@ -20,12 +13,13 @@ namespace DAIS.CoreBusiness.Services
         private readonly IGenericRepository<MaterialMaintenance> _genericRepo;
         private readonly IMapper _mapper;
         private readonly ILogger<MaterialMaintenanceService> _logger;
-        public MaterialMaintenanceService(IGenericRepository<MaterialMaintenance> genericRepo, IMapper mapper, ILogger<MaterialMaintenanceService> logger)
+        private readonly IFileManagerService _fileManager;
+        public MaterialMaintenanceService(IGenericRepository<MaterialMaintenance> genericRepo, IMapper mapper, ILogger<MaterialMaintenanceService> logger, IFileManagerService fileManager)
         {
             _genericRepo = genericRepo;
             _mapper = mapper;
             _logger = logger;
-            
+            _fileManager = fileManager;
         }
         public async Task<MaterialMaintenaceDto> AddMaterialMaintenanceAsync(MaterialMaintenaceDto materialMaintenaceDto)
         {
@@ -49,21 +43,49 @@ namespace DAIS.CoreBusiness.Services
         public async Task DeleteMaterialMaintenaceAsync(Guid id)
         {
             _logger.LogInformation("MaterialMaintenanceService:DeleteMaterialMaintenaceAsync:Method Start");
+
             try
             {
-                var materialMaintenance= _mapper.Map<MaterialMaintenance>(id);
+                var materialMaintenance = await _genericRepo.GetById(id);
+
+                if (materialMaintenance == null)
+                {
+                    _logger.LogWarning($"MaterialMaintenance with id {id} not found.");
+                    return;
+                }
+
+                // Delete files/directories if documents exist
+                if (!string.IsNullOrWhiteSpace(materialMaintenance.MaintenanceDocument))
+                {
+                    var files = materialMaintenance.MaintenanceDocument
+                                .Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var filePath in files)
+                    {
+                        try
+                        {
+                            _fileManager.Delete(filePath);
+                            _logger.LogInformation($"Deleted file: {filePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, $"Failed to delete file: {filePath}");
+                        }
+                    }
+                }
+
+                // Delete DB record
                 await _genericRepo.Remove(materialMaintenance);
 
-                
-
+                _logger.LogInformation("MaterialMaintenanceService:DeleteMaterialMaintenaceAsync:Method End");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, ex);
-                throw ex;
+                _logger.LogError(ex, "Error in DeleteMaterialMaintenaceAsync");
+                throw;
             }
-            _logger.LogInformation("MaterialMaintenanceService:DeleteMaterialMaintenaceAsync:Method End");
         }
+
 
         public async Task<List<MaterialMaintenaceDto>> GetAllMaterialMaintenacesAsync()
         {
