@@ -4,6 +4,7 @@ using DAIS.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAIS.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127084150_New Data")]
+    partial class NewData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -362,9 +365,6 @@ namespace DAIS.DataAccess.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DesignDocumentName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DocumentCategory")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DocumentFileName")

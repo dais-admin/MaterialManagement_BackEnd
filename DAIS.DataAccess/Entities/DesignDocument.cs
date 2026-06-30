@@ -10,6 +10,7 @@ namespace DAIS.DataAccess.Entities
         public virtual WorkPackage WorkPackage { get; set; }
         public string DesignDocumentName { get; set; }
         public string DocumentFileName { get; set; }
+        public string DocumentCategory { get; set; }
 
 
 

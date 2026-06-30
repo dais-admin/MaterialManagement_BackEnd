@@ -11,6 +11,7 @@ namespace DAIS.CoreBusiness.Dtos
         public WorkPackageDto? WorkPackage { get; set; }
         public string DesignDocumentName { get; set; }
         public string? DocumentFileName { get; set; }
+        public string DocumentCategory { get; set; }
         public string? ResponseMessage { get; set; }
         public bool? IsSuccess { get; set; }
        
