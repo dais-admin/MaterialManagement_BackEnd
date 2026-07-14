@@ -287,7 +287,7 @@ namespace DAIS.CoreBusiness.Services
                     var user = await GetUserByEmail(changePasswordDto.Email);
 
 
-                await _userManager.ChangePasswordAsync(user, user.PasswordHash, changePasswordDto.NewPassword);
+                await _userManager.ChangePasswordAsync(user, changePasswordDto.OldPassword, changePasswordDto.NewPassword);
                     
                 }
                 catch (Exception ex)
