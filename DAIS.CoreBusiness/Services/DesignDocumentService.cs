@@ -164,7 +164,9 @@ namespace DAIS.CoreBusiness.Services
                     }
                     existingDesignDocument.UpdatedDate = DateTime.Now;
                     existingDesignDocument.DesignDocumentName =designDocumentDto.DesignDocumentName;
-                    
+                    existingDesignDocument.DocumentCategory =designDocumentDto.DocumentCategory;
+
+
 
                 }
               
