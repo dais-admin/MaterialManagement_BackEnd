@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using DAIS.DataAccess.Entities;
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using DAIS.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -42,6 +42,7 @@ namespace DAIS.DataAccess.Data
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<Material> Materials { get; set; }
         public DbSet<DocumentType> DocumentTypes { get; set; }
+        public DbSet<DocumentCategory> DocumentCategories { get; set; }
         public DbSet<MaterialDocument> MaterialDocuments { get; set; }
         public DbSet<MaterialServiceProvider> ServiceProviders { get; set; }
         public DbSet<MaterialWarranty> MaterialWarranties { get; set; }
@@ -275,6 +276,10 @@ namespace DAIS.DataAccess.Data
             // Add unique constraint for DocumentType
             modelBuilder.Entity<DocumentType>()
                 .HasIndex(s => new { s.DocumentName })
+                .IsUnique();
+            // Add unique constraint for DocumentCategory
+            modelBuilder.Entity<DocumentCategory>()
+                .HasIndex(s => new { s.CategoryName })
                 .IsUnique();
             // Add unique constraint for DocumentType
             modelBuilder.Entity<Agency>()

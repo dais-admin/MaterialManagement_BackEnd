@@ -1,4 +1,4 @@
-﻿using DAIS.CoreBusiness.Dtos.Reports;
+using DAIS.CoreBusiness.Dtos.Reports;
 using Microsoft.AspNetCore.Http;
 
 namespace DAIS.CoreBusiness.Dtos
@@ -11,11 +11,9 @@ namespace DAIS.CoreBusiness.Dtos
         public WorkPackageDto? WorkPackage { get; set; }
         public string DesignDocumentName { get; set; }
         public string? DocumentFileName { get; set; }
-        public string? DocumentCategory { get; set; }
+        public Guid? DocumentCategoryId { get; set; }
+        public DocumentCategoryDto? DocumentCategory { get; set; }
         public string? ResponseMessage { get; set; }
         public bool? IsSuccess { get; set; }
-       
-        
-     
     }
 }

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using AutoMapper;
+﻿﻿﻿﻿﻿using AutoMapper;
 using DAIS.API.ExcelReader;
 using DAIS.API.Helpers;
 using DAIS.CoreBusiness.Extensions;
@@ -33,6 +33,7 @@ namespace DAIS.API.Extensions
             services.AddScoped<IManufacturerService, ManufacturerService>();
             services.AddScoped<ISupplierService, SupplierService>();
             services.AddScoped<IDocumentTypeService, DocumnetTypeService>();
+            services.AddScoped<IDocumentCategoryService, DocumentCategoryService>();
             services.AddScoped<IMaterialDocumentService, MaterialDocumentService>();
             services.AddScoped<IMaterialServiceProviderService, MaterialServiceProviderService>();
             services.AddScoped<IAccountService, AccountService>();

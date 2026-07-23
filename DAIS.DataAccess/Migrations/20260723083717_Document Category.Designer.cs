@@ -4,6 +4,7 @@ using DAIS.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAIS.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260723083717_Document Category")]
+    partial class DocumentCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -364,8 +367,8 @@ namespace DAIS.DataAccess.Migrations
                     b.Property<string>("DesignDocumentName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("DocumentCategoryId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("DocumentCategory")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DocumentFileName")
                         .HasColumnType("nvarchar(max)");
@@ -386,8 +389,6 @@ namespace DAIS.DataAccess.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DocumentCategoryId");
 
                     b.HasIndex("WorkPackageId");
 
@@ -2984,17 +2985,11 @@ namespace DAIS.DataAccess.Migrations
 
             modelBuilder.Entity("DAIS.DataAccess.Entities.DesignDocument", b =>
                 {
-                    b.HasOne("DAIS.DataAccess.Entities.DocumentCategory", "DocumentCategory")
-                        .WithMany()
-                        .HasForeignKey("DocumentCategoryId");
-
                     b.HasOne("DAIS.DataAccess.Entities.WorkPackage", "WorkPackage")
                         .WithMany()
                         .HasForeignKey("WorkPackageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("DocumentCategory");
 
                     b.Navigation("WorkPackage");
                 });
