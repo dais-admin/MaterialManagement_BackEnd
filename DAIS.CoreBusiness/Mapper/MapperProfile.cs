@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using DAIS.CoreBusiness.Dtos;
 using DAIS.CoreBusiness.Dtos.Reports;
 using DAIS.DataAccess.Entities;
@@ -19,6 +19,7 @@ namespace DAIS.CoreBusiness.Mapper
             CreateMap<DivisionDto, Division>().ReverseMap();
             CreateMap<SupplierDto, Supplier>().ReverseMap();
             CreateMap<DocumentMasterDto,DocumentType>().ReverseMap();
+            CreateMap<DocumentCategoryDto, DocumentCategory>().ReverseMap();
             CreateMap<MaterialDocumentDto,MaterialDocument>().ReverseMap();
             CreateMap<MaterialWarrantyDto, MaterialWarranty>().ReverseMap();
             CreateMap<MaterialHardwareDto, MaterialHardware>().ReverseMap();

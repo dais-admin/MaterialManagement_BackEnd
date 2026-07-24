@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using DAIS.CoreBusiness.Dtos;
 using DAIS.CoreBusiness.Interfaces;
 using DAIS.DataAccess.Entities;
@@ -100,9 +100,10 @@ namespace DAIS.CoreBusiness.Services
             List<DesignDocumentDto> DesignDocumentDtosList = new List<DesignDocumentDto>();
             try
             {
-                var designDocumentList = await _genericRepo.Query().
-                            Include(x => x.WorkPackage)
-                            .ThenInclude(x=>x.Project)
+                var designDocumentList = await _genericRepo.Query()
+                            .Include(x => x.WorkPackage)
+                            .ThenInclude(x => x.Project)
+                            .Include(x => x.DocumentCategory)
                             .ToListAsync().ConfigureAwait(false);
                 foreach (var designDocument in designDocumentList)
                 {
@@ -128,9 +129,10 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var designDocumentList = await _genericRepo.Query() 
-                        . Where(x=>x.WorkPackageId== workPackageId)
+                        .Where(x => x.WorkPackageId == workPackageId)
                             .Include(x => x.WorkPackage)
-                            .ThenInclude(x=>x.Project)
+                            .ThenInclude(x => x.Project)
+                            .Include(x => x.DocumentCategory)
                             .ToListAsync();
                 
                 
@@ -163,8 +165,8 @@ namespace DAIS.CoreBusiness.Services
                         existingDesignDocument.DocumentFileName = designDocumentDto.DocumentFileName;
                     }
                     existingDesignDocument.UpdatedDate = DateTime.Now;
-                    existingDesignDocument.DesignDocumentName =designDocumentDto.DesignDocumentName;
-                    existingDesignDocument.DocumentCategory =designDocumentDto.DocumentCategory;
+                    existingDesignDocument.DesignDocumentName = designDocumentDto.DesignDocumentName;
+                    existingDesignDocument.DocumentCategoryId = designDocumentDto.DocumentCategoryId;
 
 
 
@@ -189,8 +191,9 @@ namespace DAIS.CoreBusiness.Services
             try
             {
                 var designDocument = await _genericRepo.Query()
-                 .Include(x => x.WorkPackage).
-                 ThenInclude(x=>x.Project)
+                 .Include(x => x.WorkPackage)
+                 .ThenInclude(x => x.Project)
+                 .Include(x => x.DocumentCategory)
                 .FirstOrDefaultAsync(x => x.Id == Id).ConfigureAwait(false);
                 designDocumentDto = _mapper.Map<DesignDocumentDto>(designDocument);
 
