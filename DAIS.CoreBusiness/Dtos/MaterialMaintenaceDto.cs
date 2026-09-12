@@ -15,6 +15,9 @@ namespace DAIS.CoreBusiness.Dtos
         public  AgencyDto?  Agency { get; set; }
         public string? AgencyAddress { get; set; }
         public string? MaintenanceDocument { get; set; }
+        public int? AlertStatus { get; set; }
+        public int? AlertPostponedDays { get; set; }
+        public DateTime? AlertUpdatedDate { get; set; }
 
     }
 }

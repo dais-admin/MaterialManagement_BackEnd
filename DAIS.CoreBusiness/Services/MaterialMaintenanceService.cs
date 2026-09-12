@@ -93,7 +93,7 @@ namespace DAIS.CoreBusiness.Services
             List<MaterialMaintenaceDto> materialMaintenanceDtoList = new List<MaterialMaintenaceDto>();
             try
             {
-                 var  materialMaintenanceList = await _genericRepo.GetAll();
+                 var materialMaintenanceList = await _genericRepo.Query().Include(x => x.Material).Include(x => x.Agency).ToListAsync().ConfigureAwait(false);
               
 
                 foreach (var maintenance in materialMaintenanceList)
@@ -180,6 +180,72 @@ namespace DAIS.CoreBusiness.Services
             }
             _logger.LogInformation("MaterialMaintenanceService:UpdateMaterialMaintenaceAsync:Method End");
             return materialMaintenaceDto;
+        }
+            public async Task<List<MaterialMaintenaceDto>> GetUpcomingMaintenanceMaterialsAsync(int days = 30)
+        {
+            _logger.LogInformation("MaterialMaintenanceService:GetUpcomingMaintenanceMaterialsAsync:Method Start");
+            List<MaterialMaintenaceDto> materialMaintenanceDtoList = new List<MaterialMaintenaceDto>();
+            try
+            {
+                var today = DateTime.UtcNow.Date;
+                var targetDate = today.AddDays(days);
+
+                var maintenanceList = await _genericRepo.Query()
+                    .Include(x => x.Material)
+                    .Include(x => x.Agency)
+                    .Where(x => x.MaintenanceStartDate <= targetDate
+                             && (x.AlertStatus == null || (x.AlertStatus != 1 && x.AlertStatus != 2)))
+                    .OrderBy(x => x.MaintenanceStartDate)
+                    .ToListAsync().ConfigureAwait(false);
+
+                // Filter out records postponed to future date
+                maintenanceList = maintenanceList.Where(x => {
+                    if (x.AlertStatus == 1 || x.AlertStatus == 2) return false;
+                    if (x.AlertStatus == 3 && x.AlertPostponedDays.HasValue && x.AlertUpdatedDate.HasValue)
+                    {
+                        var resumeDate = x.AlertUpdatedDate.Value.Date.AddDays(x.AlertPostponedDays.Value);
+                        return today >= resumeDate;
+                    }
+                    return true;
+                }).ToList();
+
+                foreach (var maintenance in maintenanceList)
+                {
+                    var dto = _mapper.Map<MaterialMaintenaceDto>(maintenance);
+                    materialMaintenanceDtoList.Add(dto);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                throw ex;
+            }
+            _logger.LogInformation("MaterialMaintenanceService:GetUpcomingMaintenanceMaterialsAsync:Method End");
+            return materialMaintenanceDtoList;
+        }
+            public async Task<bool> UpdateAlertStatusAsync(UpdateAlertStatusDto dto)
+        {
+            _logger.LogInformation("MaterialMaintenanceService:UpdateAlertStatusAsync:Method Start");
+            try
+            {
+                var existing = await _genericRepo.GetById(dto.MaintenanceId);
+                if (existing == null)
+                {
+                    return false;
+                }
+                existing.AlertStatus = dto.AlertStatus;
+                existing.AlertPostponedDays = dto.AlertPostponedDays;
+                existing.AlertUpdatedDate = DateTime.UtcNow;
+
+                await _genericRepo.Update(existing);
+                _logger.LogInformation("MaterialMaintenanceService:UpdateAlertStatusAsync:Method End");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                throw;
+            }
         }
     }
 }

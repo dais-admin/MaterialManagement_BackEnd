@@ -42,7 +42,29 @@ namespace DAIS.API.Controllers
             var maintenanceDto = await _materialMaintenanceService.GetMaintenanceByMaterialIdAsync(materialId);
             return Ok(maintenanceDto);
         }
-        [HttpPost]
+                [HttpGet("GetUpcomingMaintenanceMaterials")]
+        public async Task<IActionResult> GetUpcomingMaintenanceMaterialsAsync([FromQuery] int days = 30)
+        {
+            var listMaterialMaintenance = await _materialMaintenanceService.GetUpcomingMaintenanceMaterialsAsync(days);
+            return Ok(listMaterialMaintenance);
+        }
+
+        [HttpPost("UpdateAlertStatus")]
+        public async Task<IActionResult> UpdateAlertStatusAsync([FromBody] UpdateAlertStatusDto dto)
+        {
+            if (dto == null || dto.MaintenanceId == Guid.Empty)
+            {
+                return BadRequest("Invalid data");
+            }
+            var result = await _materialMaintenanceService.UpdateAlertStatusAsync(dto);
+            if (!result)
+            {
+                return NotFound("Maintenance record not found");
+            }
+            return Ok(new { success = true, message = "Alert status updated successfully" });
+        }
+
+[HttpPost]
         public async Task<IActionResult> AddMaterialMaintenanceAsync([FromForm] IFormFile? maintenanceDocument, [FromForm] string maintenanceData)
         {
             if (maintenanceData == null || string.IsNullOrEmpty(maintenanceData))

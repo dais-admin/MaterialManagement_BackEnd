@@ -1,4 +1,4 @@
-﻿
+
 using DAIS.CoreBusiness.Dtos.Reports;
 using DAIS.DataAccess.Entities;
 using DAIS.DataAccess.Helpers;
@@ -9,6 +9,7 @@ namespace DAIS.CoreBusiness.Dtos
     {
         public Guid Id { get; set; }
         public string System { get; set; }
+        public bool IsMaterial { get; set; } = true;
         public string? TagNumber { get; set; }
         public string MaterialName { get; set; }
         public string MaterialCode { get; set; }

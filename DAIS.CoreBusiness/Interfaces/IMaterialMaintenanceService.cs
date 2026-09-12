@@ -16,6 +16,8 @@ namespace DAIS.CoreBusiness.Interfaces
         Task<MaterialMaintenaceDto> GetMaterialMaintenaceByIdAsync(Guid id);
         Task<List<MaterialMaintenaceDto>> GetAllMaterialMaintenacesAsync();
         Task<MaterialMaintenaceDto> GetMaintenanceByMaterialIdAsync(Guid materialId);
+        Task<List<MaterialMaintenaceDto>> GetUpcomingMaintenanceMaterialsAsync(int days = 30);
+        Task<bool> UpdateAlertStatusAsync(UpdateAlertStatusDto dto);
     }
 
 }

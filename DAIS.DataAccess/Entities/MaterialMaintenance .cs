@@ -16,6 +16,10 @@ namespace DAIS.DataAccess.Entities
         [ForeignKey("AgencyId")]
         public Guid? AgencyId { get; set; }
         public virtual Agency Agency { get; set; }
+
+        public int? AlertStatus { get; set; }
+        public int? AlertPostponedDays { get; set; }
+        public DateTime? AlertUpdatedDate { get; set; }
         
   
 

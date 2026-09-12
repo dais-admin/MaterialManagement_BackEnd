@@ -1,4 +1,4 @@
-﻿
+
 using DAIS.DataAccess.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,6 +7,7 @@ namespace DAIS.DataAccess.Entities
     public class Material : BaseEntity
     {
         public string System { get; set; }
+        public bool IsMaterial { get; set; } = true;
         public string TagNumber { get; set; }
         public string MaterialName { get; set; }
         public string MaterialCode { get; set; }
